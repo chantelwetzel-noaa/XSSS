@@ -183,6 +183,10 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
       hist.yrs <- startyr:endyr
       ofl.yrs  <- (endyr+1):foreyr
       all.yrs  <- startyr:foreyr
+
+      # Find depletion year
+      dat     <- readLines(paste0(directory, dat.name))
+      depl.yr <- as.numeric(strsplit(dat[grep("FinalDepl",dat)]," ")[[1]][1])
     }
     
     rep.new   <- readLines(file.name)

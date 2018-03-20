@@ -5,7 +5,7 @@
  changeDepl <- function(para) 
  {
     para   <- round(para,4)
-    dat <- readLines(paste(directory,dat.name,sep=""))
+    dat    <- readLines(paste0(directory, dat.name))
     depl.line <- strsplit(dat[grep("FinalDepl",dat)]," ")[[1]]
     depl.line[4] <- para
     dat[grep("FinalDepl",dat)][[1]] <- paste(depl.line,collapse=" ")
