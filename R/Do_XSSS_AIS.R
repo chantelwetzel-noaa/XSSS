@@ -383,7 +383,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
-    RepSummary   <- RepSumFxn(rep.new,n=i)
+    RepSummary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs, ssver=SS_versionNumeric)
     SB[,i]       <- RepSummary$SB
     TotBio[,i]   <- RepSummary$TotBio
     Bratio[,i]   <- RepSummary$Bratio
@@ -413,7 +413,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  colnames(parm.vec) <- c("M.f", "M.m", "h", "depl")
  
  #Get the likelihood value for each run
- likelihood <- exp(-Quant.out.good$NLL)
+ likelihood    <- exp(-Quant.out.good$NLL)
  prior.all     <- get.prior(new.para=parm.vec[,1:4])  
  posterior.all <- get.new.posterior(new.para=parm.vec[,1:4],degree=5)
  
