@@ -3,15 +3,15 @@
 ##' @param rep.new report file name to pull summary values from
 ##' @author Chantel Wetzel
 ##' @export
-RepSumFxn<- function(n,rep.new)
+RepSumFxn<- function(rep.new, n)
  {
-    tot.yrs <- c(years,ofl_yrs)
+    tot.yrs <- c(hist.yrs, ofl.yrs)
           
-    TotBio= mapply(function(x) TotBio = as.numeric(strsplit(rep.new[grep(paste(1, x,"TIME",sep=" "),rep.new)]," ")[[1]][5]),x=years)
+    TotBio= mapply(function(x) TotBio = as.numeric(strsplit(rep.new[grep(paste(1, x,"TIME",sep=" "),rep.new)]," ")[[1]][5]),x=hist.yr)
     SB = mapply(function(x) SB = as.numeric(strsplit(rep.new[grep(paste("SPB_",x,sep=""),rep.new)]," ")[[1]][3]),x=tot.yrs) 
     Bratio= mapply(function(x) Bratio = as.numeric(strsplit(rep.new[grep(paste("Bratio_",x,sep=""),rep.new)], " ")[[1]][3]),x=tot.yrs[2]:tot.yrs[length(tot.yrs)])
-    OFL = mapply(function(x) OFL = as.numeric(strsplit(rep.new[grep(paste("OFLCatch_",x,sep=""),rep.new)], " ")[[1]][3]),x=ofl_yrs)
-    ForeCat= mapply(function(x) ForeCat = as.numeric(strsplit(rep.new[grep(paste("ForeCatch_",x,sep=""),rep.new)], " ")[[1]][3]),x=ofl_yrs)    
+    OFL = mapply(function(x) OFL = as.numeric(strsplit(rep.new[grep(paste("OFLCatch_",x,sep=""),rep.new)], " ")[[1]][3]),x=ofl.yrs)
+    ForeCat= mapply(function(x) ForeCat = as.numeric(strsplit(rep.new[grep(paste("ForeCatch_",x,sep=""),rep.new)], " ")[[1]][3]),x=ofl.yrs)    
 
     RepSummary <- list()
     RepSummary[[1]] <- TotBio

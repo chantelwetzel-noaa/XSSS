@@ -15,14 +15,17 @@
 ##' @param h.in = c( prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
 ##' @param depl.in = c(0.50, 0.20, 0.01, 0.99,1) 
 ##' @param start.m.equal = FALSE
-##' @param years = the model years; seq(1916,2012,1) 
-##' @param ofl_yrs = years to calculate ofl values; seq(2013,2016,1) 
+##' @param hist.yrs = the model years; seq(1916,2012,1) 
+##' @param ofl.yrs = years to calculate ofl values; seq(2013,2016,1) 
 ##' @param depl.yr Model year associatted with the final index value, does not need to be final model year
 ##' @author Chantel Wetzel
 ##' @export
 
-SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, read.seed, entropy.level,
-                        Niter, AIS.iter, final.Niter, m.in, h.in , depl.in, start.m.equal, years, ofl_yrs, depl.yr)
+SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, 
+                        tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
+                        Niter = 2000, AIS.iter = 2000, final.Niter = 5000, 
+                        m.in, h.in , depl.in, start.m.equal, #hist.yrs, ofl.yrs, 
+                        depl.yr)
 {
 
  print("Does depl.yr match what is in the data file dummy?")
@@ -64,7 +67,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
 
  
  #Set initial seed numbers for everything-------------------------------------------------------------------------------------  
- if (read.seed == T) { 
+ if (read.seed == TRUE) { 
     load(paste(directory,"/seed_list",sep=""))
     seed.M      <- as.numeric(seed.list[[1]][,"seed.M"])
     seed.h      <- as.numeric(seed.list[[1]][,"seed.h"])
@@ -72,7 +75,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
     seed.AIS    <- as.numeric(seed.list[[1]][,"seed.AIS"]) 
     seed.final  <- as.numeric(seed.list[[1]][,"seed.final"]) }
     
- if (read.seed == F) {
+ if (read.seed == FALSE) {
     seed.M     <- get.seed()
     seed.h     <- get.seed()
     seed.depl  <- get.seed()
@@ -115,7 +118,8 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
    hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "), main="")
    hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")", sep=" "),main="")
    hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr,"(mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
-   mtext("Prior Distributions", side = 3, outer=T) }
+   mtext("Prior Distributions", side = 3, outer=T) 
+ }
  
  pdf(paste(file.name,"_priors.pdf",sep=""),width=7,height=7,)
  par(mfrow=c(2,2),oma=c(3,3,4,3))
@@ -126,30 +130,63 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
  mtext("Prior Distributions", side = 3, outer=T)
  dev.off()
  
- #Read Starter File and Change values
- starter.file <- SS_readstarter(paste(directory,"starter.ss",sep=""))
+ # Read Starter File and Change values
+ starter.file <- SS_readstarter("starter.ss")
  starter.file$run_display_detail <- 0
- starter.file$detailed_age_structrure <- 0
+ starter.file$detailed_age_structrure <- 2
  starter.file$parmtrace <- 0
  starter.file$cumreport <- 0
  starter.file$N_bootstraps <- 0
  starter.file$prior_like <- 0
  SS_writestarter(starter.file,file="starter.ss",overwrite=T)
+
+ # Rename the executable if using an older executable
+ if (file.exists("ss3.exe")){ file.rename("ss3.exe", "ss.exe") }
  
  print("Getting Intial Sample")
  start.time <- Sys.time()
- #Do the initial SS runs
+ # Do the initial SS runs
  for (i in 1:Niter)
  {
     changeM(para=parm.vec[i,1:2])
     changeH(para=parm.vec[i,3])
     changeDepl(para=parm.vec[i,4])
         
-    #Run Simple Stock Synthesis
-    if (tantalus == TRUE) { system("./SS3 -nohess > out.txt 2>&1")  }
-    if (tantalus == FALSE){ shell("ss3.exe -nohess > out.txt 2>&1")}
+    # Run Simple Stock Synthesis
+    if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
+    if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
+
+    # Determine the model version and which files will need to be read
+    # and get model dimensions
+    if(i==1){
+      rep.new   <- readLines("Report.sso")
+      
+      #Determine the SS verion
+      SS_versionCode    <- rep.new[grep("#V",rep.new)]
+      SS_version        <- rep.new[grep("Stock_Synthesis",rep.new)]
+      SS_version        <- SS_version[substring(SS_version,1,2)!="#C"] 
+      SS_versionshort   <- toupper(substr(SS_version,1,6))
+      SS_versionNumeric <- as.numeric(substring(SS_versionshort,3))      
+      file.name = ifelse(SS_versionNumeric >= 3.30, "ss_summary.sso", "Report.sso")
+
+      rawrep <- read.table(file= "Report.sso" , col.names = 1:100, fill = TRUE, quote = "", 
+              colClasses = "character", nrows = -1, comment.char = "")
+
+      begin <- matchfun(string = "TIME_SERIES", obj = rawrep[,1])+2
+      end   <- matchfun(string = "SPR_series",  obj = rawrep[,1])-1
+      
+      temptime <- rawrep[begin:end,2:3]
+      endyr    <- max(as.numeric(temptime[temptime[,2]=="TIME",1]))
+      startyr  <- min(as.numeric(rawrep[begin:end,2]))+2
+      foreyr   <- max(as.numeric(temptime[temptime[,2]=="FORE",1]))
+      
+      hist.yrs <- startyr:endyr
+      ofl.yrs  <- (endyr+1):foreyr
+      all.yrs  <- startyr:foreyr
+    }
     
-    Quant.out <- getQuant(n=i,parm=parm.vec[i,],N=Niter)
+    rep.new   <- readLines(file.name)
+    Quant.out <- getQuant(rep.new, n=i, parm=parm.vec[i,], N=Niter, ssver = SS_versionNumeric)
     
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(sim.num=i)
@@ -158,6 +195,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
     save(quant.list, file=quant.file)
  }
  end.time <- Sys.time()
+ print("Intial Sample Completed Taking Total Time of:")
  print(end.time - start.time)
  
  
@@ -207,7 +245,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
           sample.wghts     <- p 
           sir.out          <- do.sir(Ncount=0.25*Niter,input= parm.vec, wghts=sample.wghts)
           #Check for how many unique SIR draws 
-          unq.draw           <- length(unique(sir.out$get.samp))         
+          unq.draw         <- length(unique(sir.out$get.samp))         
       }
     
     #Here after sample weights are = likelihood*prior/pr
@@ -264,10 +302,11 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
         changeDepl(para=ais.parm.vec[i,4])
         
         #Run Simple Stock Synthesis
-        if (tantalus == TRUE) { system("./SS3 -nohess > out.txt 2>&1")  }
-        if (tantalus == FALSE){ shell("ss3.exe -nohess > out.txt 2>&1")}
+        if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
+        if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
 
-        Quant.out <- getQuant(n=i,parm = ais.parm.vec[i,],N=Niter)
+        rep.new   <- readLines("ss_summary.sso")
+        Quant.out <- getQuant(rep.new, n=i,parm = ais.parm.vec[i,], N=Niter, ssver = SS_versionNumeric)
         quant.list[[ais+1]] <- Quant.out
         save(quant.list, file=quant.file)  
     }
@@ -283,12 +322,13 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
     likelihood <- exp(-Quant.out.good$NLL)
 
     #Save the quantities from the report files
-    quant.good.list[[ais+1]]   <- Quant.out.good
-    parm.list [[ais+1]]   <- parm.vec
+    quant.good.list[[ais+1]]  <- Quant.out.good
+    parm.list [[ais+1]]       <- parm.vec
     save(quant.good.list, file=quant.good.file)
     save(parm.list, file=parameters)
     
     end.time <- Sys.time()
+    print("AIS Sampling Completed in Total Time:")
     print(end.time - start.time)
     
  }#End AIS loop
@@ -315,17 +355,17 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
  names(final.parm.vec) <- c("M.f","M.m", "h", "depl")
  
  #Create Storage matrixes
- tot.yrs <- c(years,ofl_yrs)
+ tot.yrs <- c(hist.yrs, ofl.yrs)
  SB      <- as.data.frame(matrix(NA,nrow=length(tot.yrs),ncol=final.Niter))
  colnames(SB) = 1:final.Niter ; rownames(SB) = tot.yrs
  Bratio  <- as.data.frame(matrix(NA,nrow=(length(tot.yrs)-1),ncol=final.Niter))
  colnames(Bratio) = 1:final.Niter ; rownames(Bratio) = tot.yrs[2]:tot.yrs[length(tot.yrs)]
- TotBio  <- as.data.frame(matrix(NA,nrow=length(years),ncol=final.Niter))
- colnames(TotBio) = 1:final.Niter ; rownames(TotBio) = years
- OFL     <- as.data.frame(matrix(NA,nrow=length(ofl_yrs),ncol=final.Niter))
- colnames(OFL) = 1:final.Niter ; rownames(OFL) = ofl_yrs
- ForeCat <- as.data.frame(matrix(NA,nrow=length(ofl_yrs),ncol=final.Niter))
- colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl_yrs 
+ TotBio  <- as.data.frame(matrix(NA,nrow=length(hist.yrs),ncol=final.Niter))
+ colnames(TotBio) = 1:final.Niter ; rownames(TotBio) = hist.yrs
+ OFL     <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
+ colnames(OFL) = 1:final.Niter ; rownames(OFL) = ofl.yrs
+ ForeCat <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
+ colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl.yrs 
  
  #Do the final SS run
  for (i in 1:final.Niter)
@@ -335,15 +375,15 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
     changeDepl(para=final.parm.vec[i,4])
         
     #Run Simple Stock Synthesis
-    if (tantalus == TRUE) { system("./SS3 -nohess > out.txt 2>&1")  }
-    if (tantalus == FALSE){ shell("ss3.exe -nohess > out.txt 2>&1") }
-    rep.new      <- readLines(paste(directory,"Report.sso",sep=""))
+    if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
+    if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1") }
     
-    Quant.out <- getQuant(n=i,parm=final.parm.vec[i,],N=final.Niter)
+    rep.new     <- readLines(file.name)
+    Quant.out   <- getQuant(rep.new, n=i,parm=final.parm.vec[i,],N=final.Niter, ssver = SS_versionNumeric)
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
-    RepSummary <-  RepSumFxn(n=i,rep.new)
+    RepSummary   <- RepSumFxn(rep.new,n=i)
     SB[,i]       <- RepSummary$SB
     TotBio[,i]   <- RepSummary$TotBio
     Bratio[,i]   <- RepSummary$Bratio
@@ -361,11 +401,11 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, tantalus, r
  index  <- (Quant.out$MissDep == FALSE & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0)
  
  Quant.out.good <- Quant.out[index,]
- rep.list[[1]] <- TotBio[,index]
- rep.list[[2]] <- SB[,index]
- rep.list[[3]] <- Bratio[,index]
- rep.list[[4]] <- OFL[,index]
- rep.list[[5]] <- ForeCat[,index]
+ rep.list[[1]]  <- TotBio[,index]
+ rep.list[[2]]  <- SB[,index]
+ rep.list[[3]]  <- Bratio[,index]
+ rep.list[[4]]  <- OFL[,index]
+ rep.list[[5]]  <- ForeCat[,index]
  
  names(rep.list) <- c("TotBio", "SB", "Bratio", "OFL", "ForeCat")
  

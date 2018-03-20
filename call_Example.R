@@ -1,57 +1,15 @@
+
+
+
 source("F:/NOAA/SSSais/code/XSSS_AIS/XSSS_AIS_v2.R")
-SSS.ais.fxn(filepath = "F:/NOAA/SSSais/", 
-            file.name = "SpeciesX" , 
+SSS.ais.fxn(filepath = "C:/My_Directory/.../", # parent directory to the file.name folder 
+            file.name = "EnglishSole" , # folder that contains the model files 
             control.name = "ENGL.ctl", 
             dat.name = "ENGL.dat",
-            tantalus = FALSE, 
-            read.seed = FALSE,
-            entropy.level= 0.92,
-            Niter = 2000,
-            AIS.iter = 2000, 
-            final.Niter = 5000,
-            m.in = c(0.28,0.27,0.40,0.40), 
+            m.in = c(0.28, 0.27,0.40,0.40), 
             h.in = c(0.87, 0.093, 0.20, 1, 1), 
             depl.in = c(0.60, 0.10, 0.01, 0.99, 1), 
             start.m.equal = FALSE, 
             years = seq(1876,2012,1), 
             ofl_yrs = seq(2013,2024,1),
-            depl.yr = 2000
-            )
-
-source("F:/NOAA/SSSais/code/XSSS_AIS/XSSS_AIS_v2.R")
-SSS.ais.fxn(filepath = "F:/NOAA/SSSais/",
-            file.name = "Widow",
-            control.name = "wdw1.ctl",
-            dat.name = "wdw1.dat",
-            tantalus = FALSE,
-            read.seed = FALSE,
-            entropy.level = 0.40,
-            Niter = 100,
-            AIS.iter = 100,
-            final.Niter = 100,
-            m.in = c(0.119768,0.129417,0.4,0.4),
-            h.in = c(0.76, 0.152, 0.20, 1),
-            depl.in = c(0.40,0.20, 0.01, 0.99,1),
-            start.m.equal = FALSE,
-            years = seq(1916,2010,1),
-            ofl_yrs = seq(2011,2012,1),
-            depl.yr = 2000
-            )
-            
-SSS.ais.fxn(filepath = "F:/NOAA/SSSais/",
-            file.name = "Canary",
-            control.name = "CANARY.ctl",
-            dat.name = "CANARY.dat",
-            tantalus = FALSE,
-            read.seed = FALSE,
-            entropy.level = 0.92,
-            Niter = 2000,
-            AIS.iter = 2000,
-            final.Niter = 5000,
-            m.in = c(0.08,0.08,0.4,0.4),
-            h.in = c(0.692, 0.2, 0.20, 1),
-            depl.in = c(0.20,0.20, 0.01, 0.99,1),
-            start.m.equal = FALSE,
-            years = seq(1916,2008,1),
-            ofl_yrs = seq(2009,2010,1),
-            depl.yr = 2000)
+            depl.yr = 2000 )
