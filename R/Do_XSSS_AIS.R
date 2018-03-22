@@ -10,9 +10,9 @@
 ##' @param Niter number of initial model runs
 ##' @param AIS.iter number of AIS model runs
 ##' @param final.Niter number of final model runs, recommened to be greater than N.iter and AIS.iter
-##' @param m.in = c( prior mean, prior stdev) which is lognormally distributed
-##' @param h.in = c( prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
-##' @param depl.in = c(0.50, 0.20, 0.01, 0.99,1) 
+##' @param m.in = c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed
+##' @param h.in = c(prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
+##' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution) 
 ##' @param hist.yrs = the model years; seq(1916,2012,1) 
 ##' @param ofl.yrs = years to calculate ofl values; seq(2013,2016,1) 
 ##' @param depl.yr Model year associatted with the final index value, does not need to be final model year
@@ -26,6 +26,7 @@
 ##' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
 ##' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
 ##' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
+##' \cod{\linkd{plot_fn}}
 ##' @import mvtnorm
 ##' @import stats
 ##' @import r4ss
