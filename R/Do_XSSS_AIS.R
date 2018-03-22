@@ -465,6 +465,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",round(mean(parm.vec[,4]),2),"sd=",round(sd(parm.vec[,4]),2),")",sep=" "),main="") 
  mtext("Posterior Distributions", side = 3, outer=T)
  dev.off()
+
+ create.Plots(dir = save.folder, rep.list, parm.list, quant.list = quant.good.list, 
+                all.yrs, ofl.yrs, depl.in, m.in, h.in)
  
  return("XSSS Completed")
 }
