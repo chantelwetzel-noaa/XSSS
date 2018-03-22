@@ -34,6 +34,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	lines(b, col= col.vec[2],lwd=2, lty = 3)
 	lines(c,col=col.vec[3], lwd=2, lty=1)
 	legend('topright',legend=c("Prior","Post-Model","Posterior"), col=col.vec,lwd=c(2,2,2),bty='n',lty=c(1,3,1))
+	legend("right", legend = paste("Posterior Median = ", round(median(val[[xx]][,"M_f"]),3)) , bty = 'n')
 
 	a <- density(parm.list[[1]]$M.m,bw=0.03) 
 	b <- density(val[[1]][,"M_m"],  bw=0.03) 
@@ -42,6 +43,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	plot(a, xlab="Male M", main='', ylim=c(0,max(a$y,b$y,c$y)), lwd=2, xlim=c(0,xlim), col = col.vec[1])
 	lines(b, col= col.vec[2],lwd=2, lty = 3)
 	lines(c,col=col.vec[3], lwd=2, lty=1)
+	legend("right", legend = paste("Posterior Median = ", round(median(val[[xx]][,"M_m"]),3)) , bty = 'n')
 
 	bw.val = 0.05
 	a <- density(parm.list[[1]]$h,bw=bw.val, from=0.2, to=1)
@@ -51,12 +53,14 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	plot(a,xlab="Steepness",main='',ylim=c(0, max(a$y,b$y,c$y)), lwd=2, xlim=c(0.2,1), col= col.vec[1])
 	lines(b, col= col.vec[2],lwd=2, lty = 3)
 	lines(c,col=col.vec[3], lwd=2, lty=1)
+	legend("right", legend = paste("Posterior Median = ", round(median(val[[xx]][,"h"]),3)) , bty = 'n')
 	
 	a <- density(parm.list[[1]]$depl,from=0,to=1, bw=0.10)
 	b <- density(val[[1]][,"depl"],  from=0,to=1, bw=0.10)
 	c <- density(val[[xx]][,"depl"], from=0,to=1, bw=0.10)
 	plot(a,xlab="Depletion in 2000",main='',ylim=c(0,max(a$y,b$y,c$y)),lwd=2,xlim=c(0,1), col= col.vec[1])
 	lines(b, col= col.vec[2],lwd=2, lty = 3); lines(c,col=col.vec[3], lwd=2, lty=1)
+	legend("right", legend = paste("Posterior Median = ", round(median(val[[xx]][,"depl"]),3)) , bty = 'n')
 	dev.off()
 
 	# Plot Parameter Correlation
@@ -79,6 +83,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	box()
 	axis(side=1); axis(side=2)
 	legend("topright", legend = "Median with 95% Interval", bty = 'n')
+	legend("bottomleft", legend = paste("Median(SB) ", hist.yrs[length(hist.yrs)], " = ", round(sb[2,length(hist.yrs)])) , bty = 'n')
 	dev.off() 
 
 	# Total Biomass
@@ -95,6 +100,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	box()
 	axis(side=1); axis(side=2)
 	legend("topright", legend = "Median with 95% Interval", bty = 'n')
+	legend("bottomleft", legend = paste("Median(Total Biomass) ", hist.yrs[length(hist.yrs)], " = ", round(sb[2,length(hist.yrs)])) , bty = 'n')
 	dev.off() 
 
 	# Depletion
@@ -112,6 +118,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	box()
 	axis(side=1); axis(side=2)
 	legend("topright", legend = "Median with 95% Interval", bty = 'n')
+	legend("bottomleft", legend = paste("Median(Depletion) ", hist.yrs[length(hist.yrs)], " = ", round(sb[2,length(hist.yrs)],3)) , bty = 'n')
 	dev.off()
 
 	# OFL and ABC plots
@@ -127,7 +134,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	xx = length(val)
 	hist(exp(val[[xx]][,"Survey_Q"]), xlim = c(0, max(exp(val[[xx]][,"Survey_Q"]))), main = "", xlab = "Survey Q")
 	abline(v = median(exp(val[[xx]][,"Survey_Q"])), col = 'red', lwd =2)
-	legend("topright", legend = paste("Median = ",round(median(val[[xx]][,"Survey_Q"]),3)) , bty = 'n')
+	legend("topright", legend = paste("Median = ",round(median(exp(val[[xx]][,"Survey_Q"])),3)) , bty = 'n')
 	dev.off()
 
 	# Plot the estimate extra variance for the survey
