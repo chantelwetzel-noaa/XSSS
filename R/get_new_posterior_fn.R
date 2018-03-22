@@ -1,9 +1,12 @@
 ##' Calculate the updated posterior probability for the good parameter vectors 
 ##' @param new.para
 ##' @param degree
+##' @param m.in initial M values
+##' @param h.in initial steepness values
+##' @param depl.in initial depletion values
 ##' @author Chantel Wetzel
 ##' @export 
- get.new.posterior <- function(new.para,degree)
+ get.new.posterior <- function(new.para, degree, m.in, h.in, depl.in)
   {
     #Calculate the new means and standard deviations 
     mean.h    <- mean(new.para$h)      ; h.sd         <- sd(new.para$h)
@@ -12,14 +15,14 @@
     mean.m.m  <- mean(new.para$M.f)    ; m.m.sd       <- sd(new.para$M.m)
     
     #Calculate the new Pr(theta) values that are NOT used in the denominator but for final comparison of dists
-    pars.h      <- pars.truncbeta(mean.h, h.sd, h.LB, h.UB)
+    pars.h      <- pars.truncbeta(mean.h, h.sd, h.in["h.LB"], h.in["h.UB"])
     alpha.h     <- pars.h[1]
     beta.h      <- pars.h[2]
     h.post      <- dbeta(new.para$h,alpha.h,beta.h)
     
     if(depl.in[5]==1)
     {
-      pars.depl      <- pars.truncbeta(mean.depl, depl.sd, depl.LB, depl.UB)
+      pars.depl      <- pars.truncbeta(mean.depl, depl.sd, depl.in["depl.LB"], depl.in["depl.UB"])
       alpha.depl     <- pars.depl[1]
       beta.depl      <- pars.depl[2]
       depl.post      <- dbeta(new.para$depl, alpha.depl, beta.depl)
@@ -33,7 +36,7 @@
     m.m.post    <- dlnorm(new.para$M.m,meanlog=(log(mean.m.m)-0.5*m.m.sd^2), sdlog=m.m.sd)
     
     #Calculate the Pr(theta) values based on the student t distribution
-    if (start.m.equal != TRUE) {
+    if (m.in["equal.m"] == FALSE) {
       covar.x     <- matrix(cov(new.para),4,4)
       mean.vec    <- c(mean.m.f, mean.m.m, mean.h,mean.depl)
       posterior   <- numeric(dim(new.para)[1])
@@ -42,7 +45,7 @@
     }
     
     #Calculate the Pr(theta) values based on the student t distribution
-    if (start.m.equal == TRUE) {
+    if (m.in["equal.m"] == TRUE) {
       covar.x     <- matrix(cov(new.para[,c(1,3,4)]),3,3)
       mean.vec    <- c(mean.m.f, mean.h, mean.depl)
       posterior   <- numeric(dim(new.para)[1])

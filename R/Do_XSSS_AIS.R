@@ -3,7 +3,6 @@
 ##' AIS is then started based on initial model weights
 ##' The final sample is performed using the weights that exceeded entropy threshold
 ##' @param filepath = parent directory above the folder with the model files 
-##' @param file.name = folder where the model files and AIS will run. The final directory structure is set as paste(filepath,"/",file.name,"/",sep="")
 ##' @param control.name = paste(file.name,".ctl",sep="")
 ##' @param dat.name = paste(file.name,".dat",sep="")
 ##' @param tantalus = TRUE/FALSE
@@ -14,32 +13,42 @@
 ##' @param m.in = c( prior mean, prior stdev) which is lognormally distributed
 ##' @param h.in = c( prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
 ##' @param depl.in = c(0.50, 0.20, 0.01, 0.99,1) 
-##' @param start.m.equal = FALSE
 ##' @param hist.yrs = the model years; seq(1916,2012,1) 
 ##' @param ofl.yrs = years to calculate ofl values; seq(2013,2016,1) 
 ##' @param depl.yr Model year associatted with the final index value, does not need to be final model year
 ##' @author Chantel Wetzel
 ##' @export
+##' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
+##' \code{\link{do_sir_fn}}, \code{\link{get_prior_fn}},
+##' \code{\link{get_new_posteriors_fn}}, \code{\link{get_new_wghts_fn}},
+##' \code{\link{fit_mvt_fn}}, \code{\link{change_m_fn}},
+##' \code{\link{change_h_fn}}, \code{\link{change_depl_fn}},
+##' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
+##' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
+##' \code{\link{match_fn}}
+##' @import mvtnorm
+##' @import stats
+##' @import r4ss
 
-SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name, 
+SSS.ais.fxn <- function(filepath, control.name, dat.name, 
                         tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
                         Niter = 2000, AIS.iter = 2000, final.Niter = 5000, 
-                        m.in, h.in , depl.in, start.m.equal, #hist.yrs, ofl.yrs, 
-                        depl.yr)
+                        m.in, h.in , depl.in) 
+                        
 {
 
- print("Does depl.yr match what is in the data file dummy?")
-
- directory  <- paste(filepath,"/",file.name,"/",sep="")
- rep.folder <- paste(directory,"report",sep="")
- save.folder<- paste(directory,"save",sep="") 
- dir.create(directory); dir.create(rep.folder); dir.create(save.folder)
- 
  #Load the required packages
  require(mvtnorm)
  require(stats)
  require(r4ss)
 
+ directory  <- paste(filepath,"/run/",sep="")
+ rep.folder <- paste(directory,"report",sep="")
+ save.folder<- paste(directory,"save",sep="") 
+ dir.create(directory, showWarnings = FALSE)
+ dir.create(rep.folder, showWarnings = FALSE)
+ dir.create(save.folder, showWarnings = FALSE)
+ 
  #Set working directory
  setwd(directory) 
 
@@ -87,113 +96,142 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  save(seed.list, file= seed.file)
  
  #Parameter standard deviations and bounds---------------------------------------------------------------------------------
- m.f.start      <- m.in[1]      ; m.f.stdev   <- m.in[3]
- m.m.start      <- m.in[2]      ; m.m.stdev   <- m.in[4]
- h.start        <- h.in[1]      ; h.stdev     <- h.in[2]      ; h.LB     <- h.in[3]     ; h.UB     <- h.in[4]
- if(depl.in[5]==1){ depl.start    <- depl.in[1]  ; depl.stdev <- depl.in[2]  ; depl.LB <- depl.in[3] ; depl.UB <- depl.in[4]}
- if(depl.in[5]==2){ depl.start    <- depl.in[1]  ; depl.stdev <- depl.in[2] }
+ names(m.in) = c("m.f.start", "m.m.start", "m.f.stdev", "m.m.stdev", "equal.m")
+ names(h.in) = c("h.start", "h.stdev", "h.LB", "h.UB")
+ names(depl.in) = c("depl.start", "depl.stdev", "depl.LB", "depl.UB", "shape") 
+
+ 
+ #m.f.start      <- m.in[1]      ; m.f.stdev   <- m.in[3]
+ #m.m.start      <- m.in[2]      ; m.m.stdev   <- m.in[4]
+ #h.start        <- h.in[1]      ; h.stdev     <- h.in[2]      ; h.LB     <- h.in[3]     ; h.UB     <- h.in[4]
+ ## There are two options for depletion; 1= rbeta, 2 = lognormal
+ #if(depl.in[5]== 1){ depl.start <- depl.in[1]  ; depl.stdev <- depl.in[2]  ; depl.LB <- depl.in[3] ; depl.UB <- depl.in[4]}
+ #if(depl.in[5]== 2){ depl.start <- depl.in[1]  ; depl.stdev <- depl.in[2] }
 
  #Draw M value from a lognormal distribution
  set.seed(seed.M)
- M.f <- rlnorm(Niter,meanlog=(log(m.f.start)-0.5*m.f.stdev^2), sdlog=m.f.stdev)  #should be on a log scale st dev  
- if(start.m.equal == TRUE) { set.seed(seed.M) }
- M.m <- rlnorm(Niter,meanlog=(log(m.m.start)-0.5*m.m.stdev^2), sdlog=m.m.stdev)
+ M.f <- rlnorm(Niter,meanlog=(log(m.in["m.f.start"])-0.5*m.in["m.f.stdev"]^2), sdlog=m.in["m.f.stdev"])  #should be on a log scale st dev  
+ if(m.in["equal.m"] == TRUE) { set.seed(seed.M) }
+ M.m <- rlnorm(Niter,meanlog=(log(m.in["m.m.start"])-0.5*m.in["m.m.stdev"]^2), sdlog=m.in["m.m.stdev"])
 
  #Draw h from beta distribution
  set.seed(seed.h)
- h <- rbeta.ab(Niter,h.start, h.stdev, h.LB, h.UB)    
+ h <- rbeta.ab(Niter,h.in["h.start"], h.in["h.stdev"], h.in["h.LB"], h.in["h.UB"])    
  
  #Draw depl from beta distribution
  set.seed(seed.depl)
- if(depl.in[5]==1) {depl <- rbeta.ab(Niter,depl.start, depl.stdev, depl.LB, depl.UB)}
- if(depl.in[5]==2) {depl <- rlnorm(Niter,meanlog=(log(depl.start)-0.5*depl.stdev^2), sdlog=depl.stdev)}
+ if(depl.in["shape"]==1) {depl <- rbeta.ab(Niter,depl.in["depl.start"], depl.in["depl.stdev"], depl.in["depl.LB"], depl.in["depl.UB"])}
+ if(depl.in["shape"]==2) {depl <- rlnorm(Niter,meanlog=(log(depl.in["depl.start"])-0.5*depl.in["depl.stdev"]^2), sdlog=depl.in["depl.stdev"])}
    
  parm.vec <- cbind.data.frame(M.f, M.m, h, depl)
  parm.vec <- round(parm.vec,4)
- 
+
+ # Move model files into the species folder
+ file.copy(paste0(filepath,"/", "starter.ss"), "starter.ss")
+ file.copy(paste0(filepath,"/", "forecast.ss"), "forecast.ss")
+ file.copy(paste0(filepath,"/", control.name), control.name)
+ file.copy(paste0(filepath,"/", dat.name), dat.name)
+ file.copy(paste0(filepath,"/", "ss3.exe"), "ss.exe")
+ file.copy(paste0(filepath,"/", "ss.exe"),  "ss.exe")
+
+ # Find depletion year
+ dat     <- readLines(dat.name)
+ depl.yr <- as.numeric(strsplit(dat[grep("FinalDepl",dat)],"[[:blank:]]+")[[1]][1])
+
+ # Create Prior Distribution Plots
  if(tantalus == FALSE) {
-   windows(record=TRUE)
-   par(mfrow=c(2,2),oma=c(3,3,4,3))
-   hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
-   hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "), main="")
-   hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")", sep=" "),main="")
-   hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr,"(mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
-   mtext("Prior Distributions", side = 3, outer=T) 
- }
- 
- pdf(paste(file.name,"_priors.pdf",sep=""),width=7,height=7,)
- par(mfrow=c(2,2),oma=c(3,3,4,3))
- hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
- hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "),main="")
- hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")",sep=" "),main="") 
- hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
- mtext("Prior Distributions", side = 3, outer=T)
- dev.off()
+    windows(record=TRUE)
+    par(mfrow=c(2,2),oma=c(3,3,4,3))
+    hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
+    hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "), main="")
+    hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")", sep=" "),main="")
+    hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr,"(mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
+    mtext("Prior Distributions", side = 3, outer=T) 
+  }
+  
+  pdf(paste0(save.folder,"/priors.pdf"),width=7,height=7,)
+  par(mfrow=c(2,2),oma=c(3,3,4,3))
+  hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
+  hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "),main="")
+  hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")",sep=" "),main="") 
+  hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
+  mtext("Prior Distributions", side = 3, outer=T)
+  dev.off()
  
  # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss")
  starter.file$run_display_detail <- 0
  starter.file$detailed_age_structrure <- 2
+ starter.file$last_estimation_phase <- 5
  starter.file$parmtrace <- 0
  starter.file$cumreport <- 0
  starter.file$N_bootstraps <- 0
  starter.file$prior_like <- 0
+ starter.file$jitter <- 0 
  SS_writestarter(starter.file,file="starter.ss",overwrite=T)
 
- # Rename the executable if using an older executable
- if (file.exists("ss3.exe")){ file.rename("ss3.exe", "ss.exe") }
+ # Determine if the model has added variance is used in the control file
+ rawctl <- read.table(file= control.name , col.names = 1:20, fill = TRUE, quote = "", 
+        colClasses = "character", nrows = -1, comment.char = "")
+
+ temp <- matchfun(string = "extra_se", obj = rawctl[,5])
+ temp2<- as.numeric(rawctl[(temp+1):(temp+2),4])
+ include.extra.se <- ifelse(sum(temp2)==0, FALSE, TRUE)
+
+ # Run Simple Stock Synthesis
+ if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
+ if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
+
+ # Determine the model version and which files will need to be read
+ # and get model dimensions
+ rep.new   <- readLines("Report.sso")
+ 
+ #Determine the SS verion
+ SS_versionCode    <- rep.new[grep("#V",rep.new)]
+ SS_version        <- rep.new[grep("Stock_Synthesis",rep.new)]
+ SS_version        <- SS_version[substring(SS_version,1,2)!="#C"] 
+ SS_versionshort   <- toupper(substr(SS_version,1,6))
+ SS_versionNumeric <- as.numeric(substring(SS_versionshort,3))      
+ file.name = ifelse(SS_versionNumeric >= 3.30, "ss_summary.sso", "Report.sso")
+
+ rawrep <- read.table(file= "Report.sso" , col.names = 1:100, fill = TRUE, quote = "", 
+         colClasses = "character", nrows = -1, comment.char = "")
+
+ begin <- matchfun(string = "TIME_SERIES", obj = rawrep[,1])+2
+ end   <- matchfun(string = "SPR_series",  obj = rawrep[,1])-1
+ 
+ temptime <- rawrep[begin:end,2:3]
+ endyr    <- max(as.numeric(temptime[temptime[,2]=="TIME",1]))
+ startyr  <- min(as.numeric(rawrep[begin:end,2]))+2
+ foreyr   <- max(as.numeric(temptime[temptime[,2]=="FORE",1]))
+ 
+ hist.yrs <- startyr:endyr
+ ofl.yrs  <- (endyr+1):foreyr
+ all.yrs  <- startyr:foreyr
+
+
+ # Set up storage matrix
+ Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr) 
  
  print("Getting Intial Sample")
  start.time <- Sys.time()
  # Do the initial SS runs
  for (i in 1:Niter)
  {
-    changeM(para=parm.vec[i,1:2])
-    changeH(para=parm.vec[i,3])
-    changeDepl(para=parm.vec[i,4])
-        
+    changeM(ctl = control.name, para=parm.vec[i,1:2])
+    changeH(ctl = control.name, para=parm.vec[i,3])
+    changeDepl(dat = dat.name, para=parm.vec[i,4])  
+
     # Run Simple Stock Synthesis
     if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
-    if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
-
-    # Determine the model version and which files will need to be read
-    # and get model dimensions
-    if(i==1){
-      rep.new   <- readLines("Report.sso")
-      
-      #Determine the SS verion
-      SS_versionCode    <- rep.new[grep("#V",rep.new)]
-      SS_version        <- rep.new[grep("Stock_Synthesis",rep.new)]
-      SS_version        <- SS_version[substring(SS_version,1,2)!="#C"] 
-      SS_versionshort   <- toupper(substr(SS_version,1,6))
-      SS_versionNumeric <- as.numeric(substring(SS_versionshort,3))      
-      file.name = ifelse(SS_versionNumeric >= 3.30, "ss_summary.sso", "Report.sso")
-
-      rawrep <- read.table(file= "Report.sso" , col.names = 1:100, fill = TRUE, quote = "", 
-              colClasses = "character", nrows = -1, comment.char = "")
-
-      begin <- matchfun(string = "TIME_SERIES", obj = rawrep[,1])+2
-      end   <- matchfun(string = "SPR_series",  obj = rawrep[,1])-1
-      
-      temptime <- rawrep[begin:end,2:3]
-      endyr    <- max(as.numeric(temptime[temptime[,2]=="TIME",1]))
-      startyr  <- min(as.numeric(rawrep[begin:end,2]))+2
-      foreyr   <- max(as.numeric(temptime[temptime[,2]=="FORE",1]))
-      
-      hist.yrs <- startyr:endyr
-      ofl.yrs  <- (endyr+1):foreyr
-      all.yrs  <- startyr:foreyr
-
-      # Find depletion year
-      dat     <- readLines(paste0(directory, dat.name))
-      depl.yr <- as.numeric(strsplit(dat[grep("FinalDepl",dat)]," ")[[1]][1])
-    }
+    if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}      
     
-    rep.new   <- readLines(file.name)
-    Quant.out <- getQuant(rep.new, n=i, parm=parm.vec[i,], N=Niter, ssver = SS_versionNumeric)
+    rep.new       <- readLines(file.name)
+    Quant.out[i,] <- getQuant(rep.new, parm=parm.vec[i,], ofl.yrs, depl.yr, 
+                                read.se = include.extra.se, ssver = SS_versionNumeric)
     
     #Rename the report file by rep number and move to a file to save for future needs
-    move.files.fxn(sim.num=i)
+    move.files.fxn(rep.folder = rep.folder, sim.num=i)
       
     quant.list[[1]]   <- Quant.out
     save(quant.list, file=quant.file)
@@ -204,7 +242,9 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  
  
  #Remove runs where depletion was not met
- Quant.out.good <- Quant.out[Quant.out$MissDep < 1 & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0,]
+ #Quant.out.good <- Quant.out[Quant.out$MissDep < 1 & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0,]
+ find <- Quant.out[,"MissDep"] ==0 & Quant.out[,"Crash"] == 0
+ Quant.out.good = Quant.out[find,]
   
  init.parms.list[[1]]   <- parm.vec #Save the initial parameter before removing them
  parm.vec <- as.data.frame(Quant.out.good[,1:4]) #Replace the parm vector with only the good runs
@@ -212,10 +252,10 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  
  #Get the likelihood value for each run
  #perhaps change this to exp(-LLsurvey) instead or exp(-NLL) for total likelihood value
- likelihood <- exp(-Quant.out.good$NLL)
+ likelihood <- exp(-Quant.out.good[,"NLL"])
  
  #Calculate the prior probability based on the initial good parameter vectors
- prior.all     <- get.prior(new.para=parm.vec) 
+ prior.all     <- get.prior(new.para=parm.vec, m.in, h.in, depl.in) 
 
  #Save the parameters 
  posterior.prior.list[[1]]    <- prior.all
@@ -244,10 +284,10 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
     if (ais == 1)
       {        
           prior            <- prior.all$prior
-          posterior.all    <- get.prior(new.para=parm.vec)
+          posterior.all    <- get.prior(new.para=parm.vec, m.in, h.in, depl.in)
           p                <- likelihood/sum(likelihood) 
           sample.wghts     <- p 
-          sir.out          <- do.sir(Ncount=0.25*Niter,input= parm.vec, wghts=sample.wghts)
+          sir.out          <- do.sir(Ncount=0.25*Niter, input= parm.vec, wghts=sample.wghts)
           #Check for how many unique SIR draws 
           unq.draw         <- length(unique(sir.out$get.samp))         
       }
@@ -259,7 +299,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
          p                  <- likelihood/sum(likelihood)
          posterior.all      <- get.new.posterior(new.para=ais.parm.vec,degree=5)
          posterior          <- posterior.all$posterior
-         prior.all          <- get.prior(new.para=ais.parm.vec) 
+         prior.all          <- get.prior(new.para=ais.parm.vec, m.in, h.in, depl.in) 
          prior              <- prior.all$prior
          sample.wghts       <- get.new.wghts(p, prior, posterior)
          sir.out            <- do.sir(Ncount=0.25*Niter,input= ais.parm.vec, wghts=sample.wghts)       
@@ -294,36 +334,37 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
     if (entropy >=entropy.level) break()
                          
     #This is where sample from the new parameter values
-    new.dists           <- fit.mvt(Niter,para=sir.vec,degree=5)
-    ais.parm.vec        <- cbind.data.frame(new.dists$M.f,new.dists$M.m,new.dists$h,new.dists$depl)
-    names(ais.parm.vec) <- c("M.f","M.m", "h","depl")
+    new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5)
+    ais.parm.vec        <- do.call("cbind", new.dists)
     
+    Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr) 
     #Do the initial SS runs
     for (i in 1:Niter)
     {
-        changeM(para=ais.parm.vec[i,1:2])
-        changeH(para=ais.parm.vec[i,3])
-        changeDepl(para=ais.parm.vec[i,4])
+        changeM(ctl = control.name, para=ais.parm.vec[i, c("M.f", "M.m")])
+        changeH(ctl = control.name, para=ais.parm.vec[i, "h"])
+        changeDepl(dat = dat.name, para=ais.parm.vec[i, "depl"])
         
         #Run Simple Stock Synthesis
         if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
         if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
 
-        rep.new   <- readLines("ss_summary.sso")
-        Quant.out <- getQuant(rep.new, n=i,parm = ais.parm.vec[i,], N=Niter, ssver = SS_versionNumeric)
+        rep.new             <- readLines("ss_summary.sso")
+        Quant.out[i,]       <- getQuant(rep.new, parm = ais.parm.vec[i,], ofl.yrs, depl.yr, read.se = include.extra.se, ssver = SS_versionNumeric)
         quant.list[[ais+1]] <- Quant.out
-        save(quant.list, file=quant.file)  
+        save(quant.list, file = quant.file)  
     }
     
     #Remove runs Crashed Runs and where Depletion was not Met
-    Quant.out.good <- Quant.out[Quant.out$MissDep < 1 & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0,]
+    find <- Quant.out[,"MissDep"] ==0 & Quant.out[,"Crash"] == 0
+    Quant.out.good = Quant.out[find,]
  
     parm.vec <- as.data.frame(Quant.out.good[,1:4]) #Replace the parm vector with only the good runs
     colnames(parm.vec) <- c("M.f", "M.m", "h", "depl")
     
     #Get the likelihood value for each run
     #trans.like <- exp(-(Quant.out.good$LL_survey-min(Quant.out.good$LL_survey)))
-    likelihood <- exp(-Quant.out.good$NLL)
+    likelihood <- exp(-Quant.out.good[,"NLL"])
 
     #Save the quantities from the report files
     quant.good.list[[ais+1]]  <- Quant.out.good
@@ -355,35 +396,36 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  final.sir.vec    <- as.data.frame(final.sir$sir.vec)
  names(final.sir.vec)<- c("M.f","M.m", "h", "depl")
 
- final.parm.vec        <- cbind.data.frame(final.sir.vec$M.f,final.sir.vec$M.m,final.sir.vec$h,final.sir.vec$depl)
- names(final.parm.vec) <- c("M.f","M.m", "h", "depl")
+ #final.parm.vec        <- cbind.data.frame(final.sir.vec$M.f,final.sir.vec$M.m,final.sir.vec$h,final.sir.vec$depl)
+ final.parm.vec        <- do.call("cbind", final.sir.vec)
+# names(final.parm.vec) <- c("M.f","M.m", "h", "depl")
  
  #Create Storage matrixes
- tot.yrs <- c(hist.yrs, ofl.yrs)
- SB      <- as.data.frame(matrix(NA,nrow=length(tot.yrs),ncol=final.Niter))
- colnames(SB) = 1:final.Niter ; rownames(SB) = tot.yrs
- Bratio  <- as.data.frame(matrix(NA,nrow=(length(tot.yrs)-1),ncol=final.Niter))
- colnames(Bratio) = 1:final.Niter ; rownames(Bratio) = tot.yrs[2]:tot.yrs[length(tot.yrs)]
- TotBio  <- as.data.frame(matrix(NA,nrow=length(hist.yrs),ncol=final.Niter))
- colnames(TotBio) = 1:final.Niter ; rownames(TotBio) = hist.yrs
+ SB      <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
+ colnames(SB) = 1:final.Niter ; rownames(SB) = all.yrs
+ Bratio  <- as.data.frame(matrix(NA,nrow=(length(all.yrs)-1),ncol=final.Niter))
+ colnames(Bratio) = 1:final.Niter ; rownames(Bratio) = all.yrs[2]:all.yrs[length(all.yrs)]
+ TotBio  <- as.data.frame(matrix(NA,nrow=length(all.yrs), ncol=final.Niter))
+ colnames(TotBio) = 1:final.Niter ; rownames(TotBio) = all.yrs
  OFL     <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
  colnames(OFL) = 1:final.Niter ; rownames(OFL) = ofl.yrs
  ForeCat <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
  colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl.yrs 
  
  #Do the final SS run
+ Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr) 
  for (i in 1:final.Niter)
  {
-    changeM(para=final.parm.vec[i,1:2])
-    changeH(para=final.parm.vec[i,3])
-    changeDepl(para=final.parm.vec[i,4])
+    changeM(ctl = control.name, para=final.parm.vec[i,c("M.f", "M.f")])
+    changeH(ctl = control.name, para=final.parm.vec[i,"h"])
+    changeDepl(dat = dat.name, para=final.parm.vec[i,"depl"])
         
     #Run Simple Stock Synthesis
     if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
     if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1") }
     
-    rep.new     <- readLines(file.name)
-    Quant.out   <- getQuant(rep.new, n=i,parm=final.parm.vec[i,],N=final.Niter, ssver = SS_versionNumeric)
+    rep.new       <- readLines(file.name)
+    Quant.out[i,] <- getQuant(rep.new, parm=final.parm.vec[i,], ofl.yrs, depl.yr, read.se = include.extra.se, ssver = SS_versionNumeric)
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
@@ -395,14 +437,14 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
     ForeCat[,i]  <- RepSummary$ForeCat
      
     #Rename the report file by rep number and move to a file to save for future needs
-    move.files.fxn(sim.num=i) 
+    move.files.fxn(rep.folder = rep.folder, sim.num=i) 
     
  }
  end.time <- Sys.time()
  print(end.time - start.time)
  
- #Remove runs Crashed Runs and where Depletion was not Met
- index  <- (Quant.out$MissDep == FALSE & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0)
+ #Remove runs Crashed Runs and where Depletion was not met
+ index <- Quant.out[,"MissDep"] ==0 & Quant.out[,"Crash"] == 0
  
  Quant.out.good <- Quant.out[index,]
  rep.list[[1]]  <- TotBio[,index]
@@ -417,9 +459,9 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  colnames(parm.vec) <- c("M.f", "M.m", "h", "depl")
  
  #Get the likelihood value for each run
- likelihood    <- exp(-Quant.out.good$NLL)
- prior.all     <- get.prior(new.para=parm.vec[,1:4])  
- posterior.all <- get.new.posterior(new.para=parm.vec[,1:4],degree=5)
+ likelihood    <- exp(-Quant.out.good[,"NLL"])
+ prior.all     <- get.prior(new.para=parm.vec[,1:4], m.in, h.in, depl.in)  
+ posterior.all <- get.new.posterior(new.para=parm.vec[,1:4], degree=5, m.in, h.in, depl.in)
  
  #Save the final trajectories, liklihood values, and probabilities
  posterior.prior.list[[Counter+2]]  <- c(prior.all, posterior.all)
@@ -440,7 +482,7 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",round(mean(parm.vec[,4]),2),"sd=",round(sd(parm.vec[,4]),2),")",sep=" "),main="") 
  mtext("Posterior Distributions", side = 3, outer=T) }
  
- pdf(paste(file.name,"_posteriors.pdf",sep=""),width=7,height=7,)
+ pdf(paste0(save.folder,"/posteriors.pdf"),width=7,height=7,)
  par(mfrow=c(2,2),oma=c(3,3,4,3))
  hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=", round(mean(parm.vec[,1]),2),"sd=",round(sd(parm.vec[,1]),2),")", sep=" "), main="")
  hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",round(mean(parm.vec[,2]),2),"sd=",round(sd(parm.vec[,2]),2),")", sep=" "),main="")
@@ -449,5 +491,5 @@ SSS.ais.fxn <- function(filepath, file.name, control.name, dat.name,
  mtext("Posterior Distributions", side = 3, outer=T)
  dev.off()
  
- return("Boom Pow Assessed!")
+ return("XSSS Completed")
 }
