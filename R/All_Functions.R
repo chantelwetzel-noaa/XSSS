@@ -1,7 +1,6 @@
 ##' Function List
 ##; @author Chantel Wetzel
 ##' @export
-
 dir = "C:/Users/Chantel.Wetzel/Documents/GitHub/XSSS_AIS/R/"
 
 source(paste0(dir, "define_matrix_fn.R"))

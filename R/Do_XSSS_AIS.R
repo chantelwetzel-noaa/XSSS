@@ -25,7 +25,7 @@
 ##' \code{\link{change_h_fn}}, \code{\link{change_depl_fn}},
 ##' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
 ##' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
-##' \code{\link{match_fn}}
+##' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
 ##' @import mvtnorm
 ##' @import stats
 ##' @import r4ss
@@ -38,9 +38,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 {
 
  #Load the required packages
- require(mvtnorm)
- require(stats)
- require(r4ss)
+ #require(mvtnorm)
+ #require(stats)
+ #require(r4ss)
 
  directory  <- paste(filepath,"/run/",sep="")
  rep.folder <- paste(directory,"report",sep="")
