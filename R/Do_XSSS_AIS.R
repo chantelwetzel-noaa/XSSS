@@ -100,13 +100,6 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  names(h.in) = c("h.start", "h.stdev", "h.LB", "h.UB")
  names(depl.in) = c("depl.start", "depl.stdev", "depl.LB", "depl.UB", "shape") 
 
- 
- #m.f.start      <- m.in[1]      ; m.f.stdev   <- m.in[3]
- #m.m.start      <- m.in[2]      ; m.m.stdev   <- m.in[4]
- #h.start        <- h.in[1]      ; h.stdev     <- h.in[2]      ; h.LB     <- h.in[3]     ; h.UB     <- h.in[4]
- ## There are two options for depletion; 1= rbeta, 2 = lognormal
- #if(depl.in[5]== 1){ depl.start <- depl.in[1]  ; depl.stdev <- depl.in[2]  ; depl.LB <- depl.in[3] ; depl.UB <- depl.in[4]}
- #if(depl.in[5]== 2){ depl.start <- depl.in[1]  ; depl.stdev <- depl.in[2] }
 
  #Draw M value from a lognormal distribution
  set.seed(seed.M)
@@ -139,24 +132,14 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  depl.yr <- as.numeric(strsplit(dat[grep("FinalDepl",dat)],"[[:blank:]]+")[[1]][1])
 
  # Create Prior Distribution Plots
- if(tantalus == FALSE) {
-    windows(record=TRUE)
-    par(mfrow=c(2,2),oma=c(3,3,4,3))
-    hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
-    hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "), main="")
-    hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")", sep=" "),main="")
-    hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr,"(mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
-    mtext("Prior Distributions", side = 3, outer=T) 
-  }
-  
-  pdf(paste0(save.folder,"/priors.pdf"),width=7,height=7,)
-  par(mfrow=c(2,2),oma=c(3,3,4,3))
-  hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
-  hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "),main="")
-  hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")",sep=" "),main="") 
-  hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
-  mtext("Prior Distributions", side = 3, outer=T)
-  dev.off()
+ pdf(paste0(save.folder,"/priors.pdf"),width=7,height=7,)
+ par(mfrow=c(2,2),oma=c(3,3,4,3))
+ hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=",m.in[1],"sd=",m.in[3],")", sep=" "), main="")
+ hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",m.in[2],"sd=",m.in[4],")", sep=" "),main="")
+ hist(parm.vec[,3],xlab= paste("Steepness (mean=",h.in[1],"sd=",h.in[2],")",sep=" "),main="") 
+ hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
+ mtext("Prior Distributions", side = 3, outer=T)
+ dev.off()
  
  # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss")
@@ -473,14 +456,6 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  save(rep.list, file= rep.file)
  save(posterior.prior.list, file=posterior.prior.file)
  save(parm.list, file=parameters)
- 
- if (tantalus == FALSE) {
- par(mfrow=c(2,2),oma=c(3,3,4,3))
- hist(parm.vec[,1],xlab= paste("Natural Mortality F (mean=", round(mean(parm.vec[,1]),2),"sd=",round(sd(parm.vec[,1]),2),")", sep=" "), main="")
- hist(parm.vec[,2],xlab= paste("Natural Mortality M (mean=",round(mean(parm.vec[,2]),2),"sd=",round(sd(parm.vec[,2]),2),")", sep=" "),main="")
- hist(parm.vec[,3],xlab= paste("Steepness (mean=",round(mean(parm.vec[,3]),2),"sd=",round(sd(parm.vec[,4]),2),")",sep=" "),main="") 
- hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",round(mean(parm.vec[,4]),2),"sd=",round(sd(parm.vec[,4]),2),")",sep=" "),main="") 
- mtext("Posterior Distributions", side = 3, outer=T) }
  
  pdf(paste0(save.folder,"/posteriors.pdf"),width=7,height=7,)
  par(mfrow=c(2,2),oma=c(3,3,4,3))
