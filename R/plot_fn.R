@@ -157,7 +157,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	}
 
 	# Plot the estimate extra variance for the survey
-	if(!is.na(val[[xx]][1,"extra_se"])){
+	if(n.extra.se > 0 ){
 	for(i in 1:n.extra.se){
 		pngfun (file = paste0("/Added_Survey_Variance_",i,".png"))
 		xx = length(val)
@@ -180,7 +180,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 				c("-", comma(apply(rep.list$Bratio, 1, median), digits = 2)),
 				c("-", paste0(comma(d.ci[1,],digits = 2), "\u2013", comma(d.ci[2,],digits = 2))) )
 	colnames(out) = c("SB", "95%", "Total_Biomass", "95%","Depletion", "95%")
-	write.csv(out, file = paste0(save.folder, "/Median_TimeSeries.csv"))
+	write.csv(out, file = paste0(dir, "/Median_TimeSeries.csv"))
 
 	ofl.ci = apply(rep.list$OFL, 1, quantile, c(0.025, 0.975))
 	abc.ci = apply(rep.list$ForeCat, 1, quantile, c(0.025, 0.975))
@@ -189,5 +189,5 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 				comma(apply(rep.list$ForeCat, 1, median), digits = 0),
 				paste0(comma(abc.ci[1,],digits = 0), "\u2013", comma(abc.ci[2,],digits = 0)) )
 	colnames(out) = c("OFL", "95%", "ABC", "95%")
-	write.csv(out, file = paste0(save.folder, "/Median_OFL_ABC.csv"))
+	write.csv(out, file = paste0(dir, "/Median_OFL_ABC.csv"))
 }

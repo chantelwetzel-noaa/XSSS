@@ -143,7 +143,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  dev.off()
  
  # Read Starter File and Change values
- starter.file <- SS_readstarter("starter.ss")
+ starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
  starter.file$run_display_detail <- 0
  starter.file$detailed_age_structrure <- 2
  starter.file$last_estimation_phase <- 5
@@ -152,7 +152,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  starter.file$N_bootstraps <- 0
  starter.file$prior_like <- 0
  starter.file$jitter <- 0 
- SS_writestarter(starter.file,file="starter.ss",overwrite=T)
+ SS_writestarter(starter.file,file="starter.ss",overwrite=T, verbose=FALSE, warn=FALSE)
 
  # Run Simple Stock Synthesis
  if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
