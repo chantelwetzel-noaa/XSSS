@@ -39,9 +39,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 {
 
  #Load the required packages
- #require(mvtnorm)
- #require(stats)
- #require(r4ss)
+ require(mvtnorm)
+ require(stats)
+ require(r4ss)
 
  directory  <- paste(filepath,"/run/",sep="")
  rep.folder <- paste(directory,"report",sep="")
@@ -97,8 +97,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  save(seed.list, file= seed.file)
  
  #Parameter standard deviations and bounds---------------------------------------------------------------------------------
- names(m.in) = c("m.f.start", "m.m.start", "m.f.stdev", "m.m.stdev", "equal.m")
- names(h.in) = c("h.start", "h.stdev", "h.LB", "h.UB")
+ names(m.in)    = c("m.f.start", "m.m.start", "m.f.stdev", "m.m.stdev", "equal.m")
+ names(h.in)    = c("h.start", "h.stdev", "h.LB", "h.UB")
  names(depl.in) = c("depl.start", "depl.stdev", "depl.LB", "depl.UB", "shape") 
 
 
@@ -154,14 +154,6 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  starter.file$jitter <- 0 
  SS_writestarter(starter.file,file="starter.ss",overwrite=T)
 
- # Determine if the model has added variance is used in the control file
- rawctl <- read.table(file= control.name , col.names = 1:20, fill = TRUE, quote = "", 
-        colClasses = "character", nrows = -1, comment.char = "")
-
- temp <- matchfun(string = "extra_se", obj = rawctl[,5])
- temp2<- as.numeric(rawctl[(temp+1):(temp+2),4])
- include.extra.se <- ifelse(sum(temp2)==0, FALSE, TRUE)
-
  # Run Simple Stock Synthesis
  if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
  if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
@@ -193,9 +185,26 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  ofl.yrs  <- (endyr+1):foreyr
  all.yrs  <- startyr:foreyr
 
+ # Determine how many suvey fleets are included
+ matchfun(string = "Surv_like", obj = rawrep[,1])
+ temp = as.numeric(rawrep[97,3:10])
+ survey.list = temp[!is.na(temp)]
+ n.survey = sum(survey.list != 0 ) - 1 # Substract 1 to remove depl survey
+
+
+ # Determine if the model has added variance is used in the control file
+ rawctl <- read.table(file= control.name , col.names = 1:20, fill = TRUE, quote = "", 
+        colClasses = "character", nrows = -1, comment.char = "")
+
+ temp <- matchfun(string = "extra_se", obj = rawctl[,5])
+ temp2<- as.numeric(rawctl[(temp+1):(temp+2),4])
+ include.extra.se <- ifelse(sum(temp2)==0, FALSE, TRUE)
+ # How many surveys have added se?
+ n.extra.se = sum(temp2)
+
 
  # Set up storage matrix
- Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr) 
+ Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.extra.se) 
  
  print("Getting Intial Sample")
  start.time <- Sys.time()
@@ -310,18 +319,18 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     sir.list[[ais]]         <- parm.vec
     sample.wght.list[[ais]] <- sample.wghts 
         
-    print(c("Entropy",entropy))
-    print(c("Effective N", effN))
-    print(c("Expected Unique Points", expN))
-    print(c("Max Weight", maxW))
-    print(c("Variance of the rescaled", varW))    
-    if (entropy >=entropy.level) break()
+    print(c("Entropy:", round(entropy,4)))
+    print(c("Effective N:", round(effN)))
+    print(c("Expected Unique Points:", round(expN)))
+    print(c("Max Weight:", round(maxW,4)))
+    print(c("Variance of the rescaled:", round(varW,4)))    
+    if (entropy >= entropy.level) break()
                          
     #This is where sample from the new parameter values
-    new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5)
+    new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5, m.in)
     ais.parm.vec        <- do.call("cbind", new.dists)
     
-    Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr) 
+    Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.extra.se) 
     #Do the initial SS runs
     for (i in 1:Niter)
     {
@@ -397,10 +406,10 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl.yrs 
  
  #Do the final SS run
- Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr) 
+ Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr, n.extra.se) 
  for (i in 1:final.Niter)
  {
-    changeM(ctl = control.name, para=final.parm.vec[i,c("M.f", "M.f")])
+    changeM(ctl = control.name, para=final.parm.vec[i,c("M.f", "M.m")])
     changeH(ctl = control.name, para=final.parm.vec[i,"h"])
     changeDepl(dat = dat.name, para=final.parm.vec[i,"depl"])
         
@@ -468,7 +477,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  dev.off()
 
  create.Plots(dir = save.folder, rep.list, parm.list, quant.list = quant.good.list, 
-                all.yrs, ofl.yrs, depl.in, m.in, h.in)
+                all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in)
  
  return("XSSS Completed")
 }

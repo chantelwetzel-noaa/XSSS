@@ -7,7 +7,7 @@
 do.sir <- function(Ncount, input, wghts)
  {
     
-    get.samp   <- sample(1:length(wghts),size=Ncount,replace=T,prob=wghts)
+    get.samp   <- sample(1:length(wghts), size=Ncount, replace=T, prob=wghts)
     sir.vec    <- input[get.samp,]
       
     output            <- NULL

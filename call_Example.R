@@ -14,7 +14,7 @@ SSS.ais.fxn(filepath = "C:/My_Directory/.../", # parent directory to the file.na
 SSS.ais.fxn(filepath = "C:/Users/Chantel.Wetzel/Desktop/pop_ais", # parent directory to the file.name folder 
             control.name = "pop.ctl" ,
             dat.name = "pop.dat",
-            Niter = 200, AIS.iter = 200, final.Niter = 400,
+            Niter = 500, AIS.iter = 500, final.Niter = 1000,
             m.in = c(0.054, 0.054,0.20,0.20, 0) ,
             h.in = c(0.50, 0.093, 0.20, 1, 1) ,
             depl.in = c(0.20, 0.10, 0.01, 0.99, 1))
@@ -24,7 +24,7 @@ filepath = "C:/Users/Chantel.Wetzel/Desktop/pop_ais" # parent directory to the f
 file.name = "POP"  # folder that contains the model files 
 control.name = "pop.ctl" 
 dat.name = "pop.dat"
-m.in = c(0.054, 0.054,0.40,0.40) 
+m.in = c(0.054, 0.054,0.40,0.40, 0) 
 h.in = c(0.50, 0.093, 0.20, 1, 1) 
 depl.in = c(0.20, 0.10, 0.01, 0.99, 1)
-start.m.equal = FALSE 
+

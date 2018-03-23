@@ -1,4 +1,5 @@
 ##' Changes the natural mortality value for female and male fish in the control file 
+##' @param ctl
 ##' @param para M vector for female and male values for the nth simulation
 ##' @author Chantel Wetzel
 ##' @export

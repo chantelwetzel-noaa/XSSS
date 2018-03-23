@@ -1,5 +1,5 @@
 create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
-						 all.yrs, ofl.yrs, depl.in, m.in, h.in){
+						 all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se){
 
 	#Get the colors for the polygons
 	rc <- function(n,alpha) {
@@ -25,7 +25,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	pngfun(file = "/Parameters.png")
 	col.vec = c("red", "green", "blue")
 	par(mfrow=c(2,2),mar=c(4,4,4,4), oma=c(1,1,1,1))
-	val = quant.good.list; xx = length(val) 
+	val = quant.list; xx = length(val) 
 	a <- density(parm.list[[1]]$M.f, bw=0.03) # Prior
 	b <- density(val[[1]][,"M_f"],   bw=0.03) # Post Model Pre-Data
 	c <- density(val[[xx]][,"M_f"],  bw=0.03) # Posterior
@@ -130,15 +130,19 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	dev.off()
 
 	# Plot the Q distribution
-	pngfun (file = "/Survey_Q.png")
-	xx = length(val)
-	hist(exp(val[[xx]][,"Survey_Q"]), xlim = c(0, max(exp(val[[xx]][,"Survey_Q"]))), main = "", xlab = "Survey Q")
-	abline(v = median(exp(val[[xx]][,"Survey_Q"])), col = 'red', lwd =2)
-	legend("topright", legend = paste("Median = ",round(median(exp(val[[xx]][,"Survey_Q"])),3)) , bty = 'n')
-	dev.off()
+	for (i in 1:n.extra.se){
+		pngfun (file = paste0("/Survey_Q_", i, ".png"))
+		xx = length(val)
+		n = matchfun(string = "Survey_Q", obj = colnames(val[[xx]])) + i - 1
+		hist(exp(val[[xx]][,n]), xlim = c(0, max(exp(val[[xx]][,n]))), main = "", xlab = paste0("Survey Q ", i))
+		abline(v = median(exp(val[[xx]][,n])), col = 'red', lwd =2)
+		legend("topright", legend = paste("Median = ",round(median(exp(val[[xx]][,n])),3)) , bty = 'n')
+		dev.off()
+	}
+
 
 	# Plot the estimate extra variance for the survey
-	if(!is.na(val[[xx]][,"extra_sa"])){
+	if(!is.na(val[[xx]][1,"extra_se"])){
 	pngfun (file = "/Added_Survey_Variance.png")
 	xx = length(val)
 	hist(val[[xx]][,"extra_se"], xlim = c(0, max(val[[xx]][,"extra_se"])), main = "", xlab = "Added Survey Variance")

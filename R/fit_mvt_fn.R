@@ -2,13 +2,14 @@
 ##' @param samp.size
 ##' @param para
 ##' @param degree
+##' @param m.in
 ##' @author Chantel Wetzel
 ##' @export
-fit.mvt<- function(samp.size,para,degree)
+fit.mvt<- function(samp.size,para,degree, m.in)
  {  
     new.dists <-list()
     
-    if(start.m.equal != TRUE) {
+    if(m.in["equal.m"] == FALSE) {
         if (depl.in[5] == 1) { #Beta Distribution Depletion 
         para.trans    <- cbind(log(para[,1]),log(para[,2]),log((para[,3]-0.2)/(1-para[,3])), log(para[,4]/(1-para[,4])) )
         sd.log        <- apply(para.trans,2,sd)
@@ -40,7 +41,7 @@ fit.mvt<- function(samp.size,para,degree)
         }
     }
     
-    if(start.m.equal == TRUE) {
+    if(m.in["equal.m"] == TRUE) {
         if (depl.in[5] == 1) { #Beta Distribution Depletion 
         para.trans    <- cbind(log(para[,1]),log((para[,2]-0.2)/(1-para[,2])), log(para[,3]/(1-para[,3])) )
         sd.log        <- apply(para.trans,2,sd)
