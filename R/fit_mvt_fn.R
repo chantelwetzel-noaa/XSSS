@@ -3,9 +3,10 @@
 ##' @param para
 ##' @param degree
 ##' @param m.in
+##' @param depl.in
 ##' @author Chantel Wetzel
 ##' @export
-fit.mvt<- function(samp.size,para,degree, m.in)
+fit.mvt<- function(samp.size,para, degree, m.in, depl.in)
  {  
     new.dists <-list()
     

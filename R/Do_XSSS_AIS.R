@@ -186,8 +186,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  all.yrs  <- startyr:foreyr
 
  # Determine how many suvey fleets are included
- matchfun(string = "Surv_like", obj = rawrep[,1])
- temp = as.numeric(rawrep[97,3:10])
+ find = matchfun(string = "Surv_like", obj = rawrep[,1])
+ temp = as.numeric(rawrep[find,3:10])
  survey.list = temp[!is.na(temp)]
  n.survey = sum(survey.list != 0 ) - 1 # Substract 1 to remove depl survey
 
@@ -221,7 +221,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     
     rep.new       <- readLines(file.name)
     Quant.out[i,] <- getQuant(rep.new, parm=parm.vec[i,], ofl.yrs, depl.yr, 
-                                read.se = include.extra.se, ssver = SS_versionNumeric)
+                              n.extra.se, n.survey, ssver = SS_versionNumeric)
     
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i)
@@ -235,7 +235,6 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  
  
  #Remove runs where depletion was not met
- #Quant.out.good <- Quant.out[Quant.out$MissDep < 1 & is.na(Quant.out$MissDep)!=T & Quant.out$Crash == 0,]
  find <- Quant.out[,"MissDep"] ==0 & Quant.out[,"Crash"] == 0
  Quant.out.good = Quant.out[find,]
   
@@ -280,7 +279,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
           posterior.all    <- get.prior(new.para=parm.vec, m.in, h.in, depl.in)
           p                <- likelihood/sum(likelihood) 
           sample.wghts     <- p 
-          sir.out          <- do.sir(Ncount=0.25*Niter, input= parm.vec, wghts=sample.wghts)
+          sir.out          <- do.sir(Ncount=floor(0.25*Niter), input= parm.vec, wghts=sample.wghts)
           #Check for how many unique SIR draws 
           unq.draw         <- length(unique(sir.out$get.samp))         
       }
@@ -290,12 +289,12 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
       {
          ais.parm.vec       <- parm.vec
          p                  <- likelihood/sum(likelihood)
-         posterior.all      <- get.new.posterior(new.para=ais.parm.vec,degree=5)
+         posterior.all      <- get.new.posterior(new.para=ais.parm.vec, degree=5, m.in, h.in, depl.in)
          posterior          <- posterior.all$posterior
          prior.all          <- get.prior(new.para=ais.parm.vec, m.in, h.in, depl.in) 
          prior              <- prior.all$prior
          sample.wghts       <- get.new.wghts(p, prior, posterior)
-         sir.out            <- do.sir(Ncount=0.25*Niter,input= ais.parm.vec, wghts=sample.wghts)       
+         sir.out            <- do.sir(Ncount=floor(0.25*Niter),input= ais.parm.vec, wghts=sample.wghts)       
          #Check for how many unique SIR draws 
          unq.draw           <- length(unique(sir.out$get.samp))
       }
@@ -327,7 +326,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     if (entropy >= entropy.level) break()
                          
     #This is where sample from the new parameter values
-    new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5, m.in)
+    new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5, m.in, depl.in)
     ais.parm.vec        <- do.call("cbind", new.dists)
     
     Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
@@ -343,7 +342,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
         if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
 
         rep.new             <- readLines("ss_summary.sso")
-        Quant.out[i,]       <- getQuant(rep.new, parm = ais.parm.vec[i,], ofl.yrs, depl.yr, read.se = include.extra.se, ssver = SS_versionNumeric)
+        Quant.out[i,]       <- getQuant(rep.new, parm = ais.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey, ssver = SS_versionNumeric)
         quant.list[[ais+1]] <- Quant.out
         save(quant.list, file = quant.file)  
     }
@@ -418,7 +417,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1") }
     
     rep.new       <- readLines(file.name)
-    Quant.out[i,] <- getQuant(rep.new, parm=final.parm.vec[i,], ofl.yrs, depl.yr, read.se = include.extra.se, ssver = SS_versionNumeric)
+    Quant.out[i,] <- getQuant(rep.new, parm=final.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey, ssver = SS_versionNumeric)
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
