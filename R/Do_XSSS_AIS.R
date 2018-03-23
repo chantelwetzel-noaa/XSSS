@@ -477,7 +477,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  dev.off()
 
  create.Plots(dir = save.folder, rep.list, parm.list, quant.list = quant.good.list, 
-                all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in)
+                all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se, n.survey)
  
  return("XSSS Completed")
 }
