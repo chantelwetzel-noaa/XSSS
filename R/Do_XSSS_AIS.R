@@ -204,7 +204,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 
 
  # Set up storage matrix
- Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.extra.se) 
+ Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
  
  print("Getting Intial Sample")
  start.time <- Sys.time()
@@ -330,7 +330,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5, m.in)
     ais.parm.vec        <- do.call("cbind", new.dists)
     
-    Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.extra.se) 
+    Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
     #Do the initial SS runs
     for (i in 1:Niter)
     {
@@ -406,7 +406,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl.yrs 
  
  #Do the final SS run
- Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr, n.extra.se) 
+ Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
  for (i in 1:final.Niter)
  {
     changeM(ctl = control.name, para=final.parm.vec[i,c("M.f", "M.m")])
