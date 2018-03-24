@@ -1,0 +1,10 @@
+Package: XSSSais
+Type: Package
+Title: What the package does (short line)
+Version: 1.0
+Date: 2018-03-22
+Author: Chantel Wetzel
+Maintainer: Chantel Wetzel <chantel.wetzel@noaa.gov>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+RoxygenNote: 6.0.1
