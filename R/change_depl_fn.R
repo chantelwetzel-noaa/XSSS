@@ -1,4 +1,5 @@
 ##' Changes the depletion value for the depletion year in the data file 
+##' @param dat 
 ##' @param para depletion parameter value for the nth simulation
 ##' @author Chantel Wetzel
 ##' @export
