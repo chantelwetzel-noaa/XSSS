@@ -22,6 +22,8 @@ RepSumFxn<- function(rep.new, n, all.yrs, hist.yrs, ofl.yrs, ssver)
     if (ssver >= 3.30){
         TotBio  = mapply(function(x) TotBio = as.numeric(strsplit(rep.new[grep(paste0("TotBio_",x),rep.new)]," ")[[1]][2]),x=all.yrs)
         SB      = mapply(function(x) SB = as.numeric(strsplit(rep.new[grep(paste0("SSB_",x),rep.new)]," ")[[1]][2]),x=all.yrs) 
+        SmryBio = mapply(function(x) SB = as.numeric(strsplit(rep.new[grep(paste0("SmryBio_",x),rep.new)]," ")[[1]][2]),x=all.yrs) 
+        SPR     = mapply(function(x) SB = as.numeric(strsplit(rep.new[grep(paste0("SPRratio_",x),rep.new)]," ")[[1]][2]),x=all.yrs) 
         Bratio  = mapply(function(x) Bratio = as.numeric(strsplit(rep.new[grep(paste0("Bratio_",x),rep.new)], " ")[[1]][2]), x=all.yrs[2]:all.yrs[length(all.yrs)])
         OFL     = mapply(function(x) OFL = as.numeric(strsplit(rep.new[grep(paste("OFLCatch_",x,sep=""),rep.new)], " ")[[1]][2]), x=ofl.yrs)
         ForeCat = mapply(function(x) ForeCat = as.numeric(strsplit(rep.new[grep(paste("ForeCatch_",x,sep=""),rep.new)], " ")[[1]][2]), x=ofl.yrs)    
@@ -33,7 +35,9 @@ RepSumFxn<- function(rep.new, n, all.yrs, hist.yrs, ofl.yrs, ssver)
     RepSummary[[3]] <- Bratio
     RepSummary[[4]] <- OFL
     RepSummary[[5]] <- ForeCat
+    RepSummary[[6]] <- SPR
+    RepSummary[[7]] <- SmryBio
 
-    names(RepSummary) <- c("TotBio", "SB","Bratio","OFL", "ForeCatch")
+    names(RepSummary) <- c("TotBio", "SB","Bratio","OFL", "ForeCatch", "SPR", "SmryBio")
     return(RepSummary)
  }

@@ -152,6 +152,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  starter.file$N_bootstraps <- 0
  starter.file$prior_like <- 0
  starter.file$jitter <- 0 
+ starter.file$SPR_basis <- 4 # Report 1-SPR 
  SS_writestarter(starter.file,file="starter.ss",overwrite=T, verbose=FALSE, warn=FALSE)
 
  # Run Simple Stock Synthesis
@@ -393,16 +394,18 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 # names(final.parm.vec) <- c("M.f","M.m", "h", "depl")
  
  #Create Storage matrixes
- SB      <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
- colnames(SB) = 1:final.Niter ; rownames(SB) = all.yrs
- Bratio  <- as.data.frame(matrix(NA,nrow=(length(all.yrs)-1),ncol=final.Niter))
- colnames(Bratio) = 1:final.Niter ; rownames(Bratio) = all.yrs[2]:all.yrs[length(all.yrs)]
- TotBio  <- as.data.frame(matrix(NA,nrow=length(all.yrs), ncol=final.Niter))
- colnames(TotBio) = 1:final.Niter ; rownames(TotBio) = all.yrs
- OFL     <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
- colnames(OFL) = 1:final.Niter ; rownames(OFL) = ofl.yrs
- ForeCat <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
- colnames(ForeCat) = 1:final.Niter ; rownames(ForeCat) = ofl.yrs 
+ SB <- TotBio <- SmryBio <- OneMinusSPR <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
+ colnames(SB) = colnames(TotBio) = colnames(SmryBio) = colnames(OneMinusSPR) = 1:final.Niter
+ rownames(SB) = rownames(TotBio) = rownames(SmryBio) = rownames(OneMinusSpr) = all.yrs
+
+ Bratio <- Exploitation <- as.data.frame(matrix(NA,nrow=(length(all.yrs)-1),ncol=final.Niter))
+ colnames(Bratio) = colnames(Exploitation) = 1:final.Niter
+ rownames(Bratio) = rownames(Exploitation) = all.yrs[2]:all.yrs[length(all.yrs)]
+
+ OFL <- ABC <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
+ colnames(OFL) = colnames(ABC) = 1:final.Niter 
+ rownames(OFL) = rownames(ABC) = ofl.yrs
+
  
  #Do the final SS run
  Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
