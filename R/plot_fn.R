@@ -142,7 +142,7 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	par(mfrow=c(1,2),mar=c(4,4,4,4),oma=c(2,2,2,2))
 	ymax = max(rep.list$OFL)
 	boxplot(t(rep.list$OFL), ylim = c(0, ymax), ylab = "OFL", xlab ="Year")
-	boxplot(t(rep.list$ForeCat), ylim = c(0, ymax), , ylab = "Adjusted Catch (ABC)", xlab ="Year")
+	boxplot(t(rep.list$ABC), ylim = c(0, ymax), , ylab = "Adjusted Catch (ABC)", xlab ="Year")
 	dev.off()
 
 	# Plot the Q distribution
@@ -186,14 +186,14 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 				comma(apply(rep.list$SmryBio,1, median), digits = 0),
 				paste0(comma(smry.ci[1,],digits = 0), "\u2013", comma(smry.ci[2,],digits = 0)),
 
-				comma(apply(rep.list$Bratio, 1, median), digits = 2)),
-				c("-", paste0(comma(d.ci[1,],digits = 2), "\u2013", comma(d.ci[2,],digits = 2))) 
+				c("-", comma(apply(rep.list$Bratio, 1, median), digits = 2)),
+				c("-", paste0(comma(d.ci[1,],digits = 2), "\u2013", comma(d.ci[2,],digits = 2))), 
 
-				comma(apply(rep.list$SPR, 1, median), digits = 3)),
-				c("-", paste0(comma(spr.ci[1,],digits = 2), "\u2013", comma(spr.ci[2,],digits = 2))) 
+				comma(apply(rep.list$SPR, 1, median), digits = 3),
+				paste0(comma(spr.ci[1,],digits = 2), "\u2013", comma(spr.ci[2,],digits = 2)), 
 
-				comma(apply(rep.list$Explotation, 1, median), digits = 3)),
-				c("-", paste0(comma(exp.ci[1,],digits = 3), "\u2013", comma(exp.ci[2,],digits = 3))) )
+				comma(apply(rep.list$Exploitation, 1, median), digits = 3),
+				paste0(comma(exp.ci[1,],digits = 3), "\u2013", comma(exp.ci[2,],digits = 3)) )
 
 	colnames(out) = c("SB", "95%", "Total_Biomass", "95%", "Summary_Biomass", "95%","Depletion", "95%", "SPR", "95%", "Exploitation", "95%")
 	write.csv(out, file = paste0(dir, "/Median_TimeSeries.csv"))

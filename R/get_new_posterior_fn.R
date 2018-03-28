@@ -15,14 +15,14 @@
     mean.m.m  <- mean(new.para$M.f)    ; m.m.sd       <- sd(new.para$M.m)
     
     #Calculate the new Pr(theta) values that are NOT used in the denominator but for final comparison of dists
-    pars.h      <- pars.truncbeta(mean.h, h.sd, h.in["h.LB"], h.in["h.UB"])
+    pars.h      <- pars.truncbeta(mean.h, h.sd, h.in["LB"], h.in["UB"])
     alpha.h     <- pars.h[1]
     beta.h      <- pars.h[2]
     h.post      <- dbeta(new.para$h,alpha.h,beta.h)
     
     if(depl.in[5]==1)
     {
-      pars.depl      <- pars.truncbeta(mean.depl, depl.sd, depl.in["depl.LB"], depl.in["depl.UB"])
+      pars.depl      <- pars.truncbeta(mean.depl, depl.sd, depl.in["LB"], depl.in["UB"])
       alpha.depl     <- pars.depl[1]
       beta.depl      <- pars.depl[2]
       depl.post      <- dbeta(new.para$depl, alpha.depl, beta.depl)
