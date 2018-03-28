@@ -175,7 +175,6 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 	smry.ci = apply(rep.list$SmryBio, 1, quantile, c(0.025, 0.975))
 	d.ci    = apply(rep.list$Bratio, 1, quantile, c(0.025, 0.975))
 	spr.ci  = apply(rep.list$SPR, 1, quantile, c(0.025, 0.975))
-	catch   = rep.list$Catch
 	exp.ci  = apply(rep.list$Exploitation, 1, quantile, c(0.025, 0.975))
 
 	out     = cbind(comma(apply(rep.list$SB, 1, median), digits = 0),
@@ -194,18 +193,16 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 				c("-", paste0(comma(spr.ci[1,],digits = 2), "\u2013", comma(spr.ci[2,],digits = 2))) 
 
 				comma(apply(rep.list$Explotation, 1, median), digits = 3)),
-				c("-", paste0(comma(exp.ci[1,],digits = 3), "\u2013", comma(exp.ci[2,],digits = 3))), 
+				c("-", paste0(comma(exp.ci[1,],digits = 3), "\u2013", comma(exp.ci[2,],digits = 3))) )
 
-				catch)
-
-	colnames(out) = c("SB", "95%", "Total_Biomass", "95%", "Summary_Biomass", "95%","Depletion", "95%", "SPR", "95%", "Exploitation", "95%", "Catch")
+	colnames(out) = c("SB", "95%", "Total_Biomass", "95%", "Summary_Biomass", "95%","Depletion", "95%", "SPR", "95%", "Exploitation", "95%")
 	write.csv(out, file = paste0(dir, "/Median_TimeSeries.csv"))
 
 	ofl.ci = apply(rep.list$OFL, 1, quantile, c(0.025, 0.975))
-	abc.ci = apply(rep.list$ForeCat, 1, quantile, c(0.025, 0.975))
+	abc.ci = apply(rep.list$ABC, 1, quantile, c(0.025, 0.975))
 	out = cbind(comma(apply(rep.list$OFL, 1, median), digits = 0),
 				paste0(comma(ofl.ci[1,],digits = 0), "\u2013", comma(ofl.ci[2,],digits = 0)),
-				comma(apply(rep.list$ForeCat, 1, median), digits = 0),
+				comma(apply(rep.list$ABC, 1, median), digits = 0),
 				paste0(comma(abc.ci[1,],digits = 0), "\u2013", comma(abc.ci[2,],digits = 0)) )
 	colnames(out) = c("OFL", "95%", "ABC", "95%")
 	write.csv(out, file = paste0(dir, "/Median_OFL_ABC.csv"))
