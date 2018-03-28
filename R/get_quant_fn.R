@@ -5,18 +5,17 @@
 ##' @param depl.yrs
 ##' @param n.extra.se
 ##' @param n.survey
-##' @param ssver model version
 ##' @author Chantel Wetzel
 ##' @export
- getQuant <- function(rep.new, parm, ofl.yrs, depl.yr, n.extra.se, n.survey, ssver)
+ getQuant <- function(rep.new, parm, ofl.yrs, depl.yr, n.extra.se, n.survey)
  {
      
                                         
-    sb.name  <- ifelse(ssver >=3.3, "SSB", "SPB")
-    unfished <- ifelse(ssver >=3.3, "unfished", "Unfished")
-    index    <- ifelse(ssver >=3.3, 2, 3)
-    spr.tgt  <- ifelse(ssver >=3.3, "SPR", "SPRtgt")
-    yield    <- ifelse(ssver >=3.3, "Dead_Catch", "TotYield")
+    sb.name  <- "SSB"
+    unfished <- "unfished"
+    index    <- 2
+    spr.tgt  <- "SPR"
+    yield    <- "Dead_Catch"
 
     se = q = numeric(0)
     for (i in 1:n.survey){
