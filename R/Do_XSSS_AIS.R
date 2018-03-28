@@ -162,6 +162,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  # Determine the model version and which files will need to be read
  # and get model dimensions
  rep.new   <- readLines("Report.sso")
+
+ # Select the catch time series
+ Catch = 
  
  #Determine the SS verion
  SS_versionCode    <- rep.new[grep("#V",rep.new)]
@@ -388,10 +391,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  final.sir        <- do.sir(Ncount=final.Niter, input=parm.vec, wghts=sample.wghts)
  final.sir.vec    <- as.data.frame(final.sir$sir.vec)
  names(final.sir.vec)<- c("M.f","M.m", "h", "depl")
+ final.parm.vec      <- do.call("cbind", final.sir.vec)
 
- #final.parm.vec        <- cbind.data.frame(final.sir.vec$M.f,final.sir.vec$M.m,final.sir.vec$h,final.sir.vec$depl)
- final.parm.vec        <- do.call("cbind", final.sir.vec)
-# names(final.parm.vec) <- c("M.f","M.m", "h", "depl")
  
  #Create Storage matrixes
  SB <- TotBio <- SmryBio <- OneMinusSPR <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
@@ -426,10 +427,13 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
        
     RepSummary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs, ssver=SS_versionNumeric)
     SB[,i]       <- RepSummary$SB
+    SmryBio[,i]  <- RepSummary$SmryBio
+    SPR[,i]      <- RepSummary$SPR
     TotBio[,i]   <- RepSummary$TotBio
     Bratio[,i]   <- RepSummary$Bratio
     OFL[,i]      <- RepSummary$OFL
-    ForeCat[,i]  <- RepSummary$ForeCat
+    ABC[,i]      <- RepSummary$ForeCat
+    Exploitation[,i] <- Catch / RepSummary$TotBio
      
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i) 

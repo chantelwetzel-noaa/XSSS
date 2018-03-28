@@ -170,16 +170,35 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 
 
 	# Write output tables
-	sb.ci = apply(rep.list$SB, 1, quantile, c(0.025, 0.975))
-	tb.ci = apply(rep.list$TotBio, 1, quantile, c(0.025, 0.975))
-	d.ci  = apply(rep.list$Bratio, 1, quantile, c(0.025, 0.975))
-	out = cbind(comma(apply(rep.list$SB, 1, median), digits = 0),
+	sb.ci   = apply(rep.list$SB, 1, quantile, c(0.025, 0.975))
+	tb.ci   = apply(rep.list$TotBio, 1, quantile, c(0.025, 0.975))
+	smry.ci = apply(rep.list$SmryBio, 1, quantile, c(0.025, 0.975))
+	d.ci    = apply(rep.list$Bratio, 1, quantile, c(0.025, 0.975))
+	spr.ci  = apply(rep.list$SPR, 1, quantile, c(0.025, 0.975))
+	catch   = rep.list$Catch
+	exp.ci  = apply(rep.list$Exploitation, 1, quantile, c(0.025, 0.975))
+
+	out     = cbind(comma(apply(rep.list$SB, 1, median), digits = 0),
 				paste0(comma(sb.ci[1,],digits = 0), "\u2013", comma(sb.ci[2,],digits = 0)),
+
 				comma(apply(rep.list$TotBio,1, median), digits = 0),
 				paste0(comma(tb.ci[1,],digits = 0), "\u2013", comma(tb.ci[2,],digits = 0)),
-				c("-", comma(apply(rep.list$Bratio, 1, median), digits = 2)),
-				c("-", paste0(comma(d.ci[1,],digits = 2), "\u2013", comma(d.ci[2,],digits = 2))) )
-	colnames(out) = c("SB", "95%", "Total_Biomass", "95%","Depletion", "95%")
+
+				comma(apply(rep.list$SmryBio,1, median), digits = 0),
+				paste0(comma(smry.ci[1,],digits = 0), "\u2013", comma(smry.ci[2,],digits = 0)),
+
+				comma(apply(rep.list$Bratio, 1, median), digits = 2)),
+				c("-", paste0(comma(d.ci[1,],digits = 2), "\u2013", comma(d.ci[2,],digits = 2))) 
+
+				comma(apply(rep.list$SPR, 1, median), digits = 3)),
+				c("-", paste0(comma(spr.ci[1,],digits = 2), "\u2013", comma(spr.ci[2,],digits = 2))) 
+
+				comma(apply(rep.list$Explotation, 1, median), digits = 3)),
+				c("-", paste0(comma(exp.ci[1,],digits = 3), "\u2013", comma(exp.ci[2,],digits = 3))), 
+
+				catch)
+
+	colnames(out) = c("SB", "95%", "Total_Biomass", "95%", "Summary_Biomass", "95%","Depletion", "95%", "SPR", "95%", "Exploitation", "95%", "Catch")
 	write.csv(out, file = paste0(dir, "/Median_TimeSeries.csv"))
 
 	ofl.ci = apply(rep.list$OFL, 1, quantile, c(0.025, 0.975))
