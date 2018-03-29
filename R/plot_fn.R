@@ -186,15 +186,17 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 		se = as.numeric(indices$se_log[find])
 		hi = qlnorm(0.975, meanlog = log(yy), sdlog = se)
 		lo = qlnorm(0.025, meanlog = log(yy), sdlog = se)
-		#if (n.extra.se > 0 ){
-		#	n = matchfun(string = "extra_se", obj = colnames(val[[length(val)]])) + i - 1
-		#	hi.var = 
-		#	lo.var =
-		#}
+		if (n.extra.se > 0 ){
+			n = matchfun(string = "extra_se", obj = colnames(val[[length(val)]])) + i - 1
+			hi.var = qlnorm(0.975, meanlog = log(yy), sdlog = (se + median(val[[length(val)]][,n])))
+			lo.var = qlnorm(0.025, meanlog = log(yy), sdlog = (se + median(val[[length(val)]][,n])))
+		}
 		plot(0, type='n', xlim=range(xx), ylim=c(0,1.1*max(hi)), xlab="Year", ylab="Index", yaxs='i', main = survey.names[i])
-		arrows(x0=xx, y0=hi, x1=xx, y1=lo, angle=90, code=3, length=0.01)
+		arrows(x0=xx, y0=hi, x1=xx, y1=lo, angle=90, code=3, length=0.01, lwd = 3)
 		points(xx, yy, pch=21, bg='white', cex=1.2)
 		lines(xx, med.surv, lty =1, lwd = 2, col = 2)
+		if (n.extra.se > 0 ){
+			arrows(x0=xx, y0=hi.var, x1=xx, y1=lo.var, angle=90, code=3, length=0.01, lwd = 3) }
 	}
 	dev.off()
 
