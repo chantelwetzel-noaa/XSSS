@@ -168,6 +168,35 @@ create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
 		dev.off()
 	}}
 
+	# Create index plots
+	data.file <- SS_readdat_3.30(dat.name, verbose = FALSE)
+	ind = data.file$fleetinfo[,"type"]
+ 	ind = ind == 3
+ 	survey.names = data.file$fleetnames[ind]
+	indices <- data.file$CPUE
+	ind = unique(indices$index)
+	
+	pngfun(file = "Survey_fits.png")
+	par(mfrow=c((length(ind)-1),1))
+	for (i in 1:(length(ind)-1)){
+		find = indices$index==ind[i]
+		med.surv = apply(rep.list$Survey[find,], 1, median)
+		xx = as.numeric(indices$year[find])
+		yy = as.numeric(indices$obs[find])
+		se = as.numeric(indices$se_log[find])
+		hi = qlnorm(0.975, meanlog = log(yy), sdlog = se)
+		lo = qlnorm(0.025, meanlog = log(yy), sdlog = se)
+		#if (n.extra.se > 0 ){
+		#	n = matchfun(string = "extra_se", obj = colnames(val[[length(val)]])) + i - 1
+		#	hi.var = 
+		#	lo.var =
+		#}
+		plot(0, type='n', xlim=range(xx), ylim=c(0,1.1*max(hi)), xlab="Year", ylab="Index", yaxs='i', main = survey.names[i])
+		arrows(x0=xx, y0=hi, x1=xx, y1=lo, angle=90, code=3, length=0.01)
+		points(xx, yy, pch=21, bg='white', cex=1.2)
+		lines(xx, med.surv, lty =1, lwd = 2, col = 2)
+	}
+	dev.off()
 
 	# Write output tables
 	sb.ci   = apply(rep.list$SB, 1, quantile, c(0.025, 0.975))

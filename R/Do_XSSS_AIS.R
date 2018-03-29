@@ -3,8 +3,8 @@
 ##' AIS is then started based on initial model weights
 ##' The final sample is performed using the weights that exceeded entropy threshold
 ##' @param filepath = parent directory above the folder with the model files 
-##' @param control.name = paste(file.name,".ctl",sep="")
-##' @param dat.name = paste(file.name,".dat",sep="")
+##' @param control.name 
+##' @param dat.name
 ##' @param tantalus = TRUE/FALSE
 ##' @param read.seed = TRUE/FALSE
 ##' @param Niter number of initial model runs
@@ -13,9 +13,8 @@
 ##' @param m.in = c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed
 ##' @param h.in = c(prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
 ##' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution) 
-##' @param hist.yrs = the model years; seq(1916,2012,1) 
-##' @param ofl.yrs = years to calculate ofl values; seq(2013,2016,1) 
-##' @param depl.yr Model year associatted with the final index value, does not need to be final model year
+##' @param fmsy.m.in
+##' @param bmsy.b0.in
 ##' @author Chantel Wetzel
 ##' @export
 ##' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
@@ -34,7 +33,7 @@
 SSS.ais.fxn <- function(filepath, control.name, dat.name, 
                         tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
                         Niter = 2000, AIS.iter = 2000, final.Niter = 5000, 
-                        m.in, h.in , depl.in) 
+                        m.in, h.in , depl.in, fmsy.m.in = NULL, bmsy.b0.in = NULL) 
                         
 {
 
@@ -79,44 +78,64 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  #Set initial seed numbers for everything-------------------------------------------------------------------------------------  
  if (read.seed == TRUE) { 
     load(paste(directory,"/seed_list",sep=""))
-    seed.M      <- as.numeric(seed.list[[1]][,"seed.M"])
-    seed.h      <- as.numeric(seed.list[[1]][,"seed.h"])
-    seed.depl   <- as.numeric(seed.list[[1]][,"seed.depl"])
-    seed.AIS    <- as.numeric(seed.list[[1]][,"seed.AIS"]) 
-    seed.final  <- as.numeric(seed.list[[1]][,"seed.final"]) }
+    seed.M       <- as.numeric(seed.list[[1]][,"seed.M"])
+    seed.h       <- as.numeric(seed.list[[1]][,"seed.h"])
+    seed.depl    <- as.numeric(seed.list[[1]][,"seed.depl"])
+    seed.fmsy.m  <- as.numeric(seed.list[[1]][,"seed.fmsy.m"])
+    seed.bmsy.b0 <- as.numeric(seed.list[[1]][,"seed.bmsy.b0"])
+    seed.AIS     <- as.numeric(seed.list[[1]][,"seed.AIS"]) 
+    seed.final   <- as.numeric(seed.list[[1]][,"seed.final"]) }
     
  if (read.seed == FALSE) {
-    seed.M     <- get.seed()
-    seed.h     <- get.seed()
-    seed.depl  <- get.seed()
-    seed.AIS   <- get.seed()
-    seed.final <- get.seed() }
+    seed.M       <- get.seed()
+    seed.h       <- get.seed()
+    seed.depl    <- get.seed()
+    seed.fmsy.m  <- get.seed()
+    seed.bmsy.b0 <- get.seed()
+    seed.AIS     <- get.seed()
+    seed.final   <- get.seed() }
  
  #Save the seeds and write them out
- seed.list[[1]] <- cbind(seed.M,seed.h,seed.depl,seed.AIS, seed.final)
+ seed.list[[1]] <- cbind(seed.M,seed.h,seed.depl, seed.fmsy.m, seed.bmsy.b0, seed.AIS, seed.final)
  save(seed.list, file= seed.file)
  
  #Parameter standard deviations and bounds---------------------------------------------------------------------------------
- names(m.in)    = c("m.f.start", "m.m.start", "m.f.stdev", "m.m.stdev", "equal.m")
- names(h.in)    = c("h.start", "h.stdev", "h.LB", "h.UB")
- names(depl.in) = c("depl.start", "depl.stdev", "depl.LB", "depl.UB", "shape") 
-
+ names(m.in)    = c("m.f", "m.m", "f.stdev", "m.stdev", "equal.m")
+ names(h.in)    = c("h", "stdev", "LB", "UB")
+ names(depl.in) = c("depl", "stdev", "LB", "UB", "shape") 
 
  #Draw M value from a lognormal distribution
  set.seed(seed.M)
- M.f <- rlnorm(Niter,meanlog=(log(m.in["m.f.start"])-0.5*m.in["m.f.stdev"]^2), sdlog=m.in["m.f.stdev"])  #should be on a log scale st dev  
+ M.f <- rlnorm(Niter,meanlog=(log(m.in["m.f"])-0.5*m.in["f.stdev"]^2), sdlog=m.in["f.stdev"])  #should be on a log scale st dev  
  if(m.in["equal.m"] == TRUE) { set.seed(seed.M) }
- M.m <- rlnorm(Niter,meanlog=(log(m.in["m.m.start"])-0.5*m.in["m.m.stdev"]^2), sdlog=m.in["m.m.stdev"])
+ M.m <- rlnorm(Niter,meanlog=(log(m.in["m.m"])-0.5*m.in["m.stdev"]^2), sdlog=m.in["m.stdev"])
 
  #Draw h from beta distribution
  set.seed(seed.h)
- h <- rbeta.ab(Niter,h.in["h.start"], h.in["h.stdev"], h.in["h.LB"], h.in["h.UB"])    
+ h <- rbeta.ab(Niter,h.in["h"], h.in["stdev"], h.in["LB"], h.in["UB"])    
  
- #Draw depl from beta distribution
+ #Draw depl from beta or lognormal distribution
  set.seed(seed.depl)
- if(depl.in["shape"]==1) {depl <- rbeta.ab(Niter,depl.in["depl.start"], depl.in["depl.stdev"], depl.in["depl.LB"], depl.in["depl.UB"])}
- if(depl.in["shape"]==2) {depl <- rlnorm(Niter,meanlog=(log(depl.in["depl.start"])-0.5*depl.in["depl.stdev"]^2), sdlog=depl.in["depl.stdev"])}
-   
+ if(depl.in["shape"]==1) {depl <- rbeta.ab(Niter,depl.in["depl"], depl.in["stdev"], depl.in["LB"], depl.in["UB"])}
+ if(depl.in["shape"]==2) {depl <- rlnorm(Niter,meanlog=(log(depl.in["depl"])-0.5*depl.in["stdev"]^2), sdlog=depl.in["stdev"])}
+
+ #Draw fmsy/m from beta or lognormal distribution
+ if (!is.null(fmsy.m.in)){
+  names(fmsy.m.in) = c("fmsy.m", "stdev", "LB", "UB", "shape")
+  set.seed(seed.fmsy.m)
+  if(fmsy.m.in["shape"]==1) {fmsy.m <- rbeta.ab(Niter,fmsy.m.in["fmsy.m"], fmsy.m.in["stdev"], fmsy.m.in["LB"], fmsy.m.in["UB"])}
+  if(fmsy.m.in["shape"]==2) {fmsy.m <- rlnorm(Niter,meanlog=(log(fmsy.m.in["fmsy.m"])-0.5*fmsy.m.in["stdev"]^2), sdlog=fmsy.m.in["stdev"])}
+ }
+
+ if (is.null(fmsy.m.in) & !is.null(bmsy.b0.in)) {c("Need to define bmsy.b0 since fmsy.m is being used")}
+ if (!is.null(bmsy.b0.in) ) {
+  names(fmsy.m.in) = c("bmsy.b0", "stdev", "LB", "UB", "shape")
+  set.seed(seed.bmsy.b0)
+  if(bmsy.b0.in["shape"]==1) {bmsy.b0 <- rbeta.ab(Niter,fmsy.m.in["bmsy.b0"], fmsy.m.in["stdev"], fmsy.m.in["LB"], fmsy.m.in["UB"])}
+  if(bmsy.b0.in["shape"]==2) {bmsy.b0 <- rlnorm(Niter,meanlog=(log(fmsy.m.in["bmsy.b0"])-0.5*fmsy.m.in["stdev"]^2), sdlog=fmsy.m.in["stdev"])}
+ }
+
+
  parm.vec <- cbind.data.frame(M.f, M.m, h, depl)
  parm.vec <- round(parm.vec,4)
 
@@ -141,6 +160,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  hist(parm.vec[,4],xlab= paste("Depletion Target (,",depl.yr," (mean=",depl.in[1],"sd=",depl.in[2],")",sep=" "),main="") 
  mtext("Prior Distributions", side = 3, outer=T)
  dev.off()
+
+ file.name = "ss_summary.sso"
  
  # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
@@ -155,6 +176,20 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  starter.file$SPR_basis <- 4 # Report 1-SPR 
  SS_writestarter(starter.file,file="starter.ss",overwrite=T, verbose=FALSE, warn=FALSE)
 
+ data.file <- SS_readdat_3.30(dat.name, verbose = FALSE)
+ data.file$CPUEinfo[,"SD_Report"] = 1
+ SS_writedat_3.30(data.file, outfile = dat.name, overwrite = T, verbose = FALSE)
+ ind = data.file$fleetinfo[,"type"]
+ ind = ind == 3
+ survey.names = data.file$fleetnames[ind]
+ temp = 1:length(ind)
+ survey.fleet.number = temp[ind]
+ survey.yrs = NULL
+ for (a in 1:length(survey.names)){
+  find = data.file$CPUE$index == survey.fleet.number[a]
+  survey.yrs = c(survey.yrs, as.numeric(data.file$CPUE$year[find]))
+ }
+
  # Run Simple Stock Synthesis
  if (tantalus == TRUE) { system("./SS -nohess > out.txt 2>&1")  }
  if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
@@ -162,18 +197,6 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  # Determine the model version and which files will need to be read
  # and get model dimensions
  rep.new   <- readLines("Report.sso")
-
- # Select the catch time series
- Catch = 
- 
- #Determine the SS verion
- SS_versionCode    <- rep.new[grep("#V",rep.new)]
- SS_version        <- rep.new[grep("Stock_Synthesis",rep.new)]
- SS_version        <- SS_version[substring(SS_version,1,2)!="#C"] 
- SS_versionshort   <- toupper(substr(SS_version,1,6))
- SS_versionNumeric <- as.numeric(substring(SS_versionshort,3))      
- file.name = ifelse(SS_versionNumeric >= 3.30, "ss_summary.sso", "Report.sso")
-
  rawrep <- read.table(file= "Report.sso" , col.names = 1:100, fill = TRUE, quote = "", 
          colClasses = "character", nrows = -1, comment.char = "")
 
@@ -188,6 +211,22 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  hist.yrs <- startyr:endyr
  ofl.yrs  <- (endyr+1):foreyr
  all.yrs  <- startyr:foreyr
+
+ # Determine the number of fleets and the catch
+ begin <- matchfun(string = "CATCH", obj = rawrep[,1])+2
+ end   <- matchfun(string = "TIME_SERIES", obj = rawrep[,1])-1
+ temp  <- rawrep[begin:end, 1:18]
+ names <- unique(temp[,2]) # This is a list of fishery names with catch associated with them
+ fleet.num <- unique(temp[,1])
+
+ total.dead = total.catch = 0 
+ for (i in 1:length(fleet.num)){
+   killed = mapply(function(x) killed = as.numeric(strsplit(rep.new[grep(paste(fleet.num[i], names[i], x, sep=" "),rep.new)]," ")[[1]][14]), x = hist.yrs)
+   total.dead = total.dead + killed
+ }
+  
+ Catch = total.dead
+ names(Catch) = hist.yrs
 
  # Determine how many suvey fleets are included
  find = matchfun(string = "Surv_like", obj = rawrep[,1])
@@ -225,7 +264,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     
     rep.new       <- readLines(file.name)
     Quant.out[i,] <- getQuant(rep.new, parm=parm.vec[i,], ofl.yrs, depl.yr, 
-                              n.extra.se, n.survey, ssver = SS_versionNumeric)
+                              n.extra.se, n.survey)
     
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i)
@@ -326,7 +365,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     print(c("Effective N:", round(effN)))
     print(c("Expected Unique Points:", round(expN)))
     print(c("Max Weight:", round(maxW,4)))
-    print(c("Variance of the rescaled:", round(varW,4)))    
+    #print(c("Variance of the rescaled:", round(varW,4)))    
     if (entropy >= entropy.level) break()
                          
     #This is where sample from the new parameter values
@@ -346,7 +385,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
         if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}
 
         rep.new             <- readLines("ss_summary.sso")
-        Quant.out[i,]       <- getQuant(rep.new, parm = ais.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey, ssver = SS_versionNumeric)
+        Quant.out[i,]       <- getQuant(rep.new, parm = ais.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey)
         quant.list[[ais+1]] <- Quant.out
         save(quant.list, file = quant.file)  
     }
@@ -395,18 +434,19 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 
  
  #Create Storage matrixes
- SB <- TotBio <- SmryBio <- OneMinusSPR <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
- colnames(SB) = colnames(TotBio) = colnames(SmryBio) = colnames(OneMinusSPR) = 1:final.Niter
- rownames(SB) = rownames(TotBio) = rownames(SmryBio) = rownames(OneMinusSpr) = all.yrs
+ SB <- TotBio <- SmryBio <- SPR <- Exploitation <- as.data.frame(matrix(NA,nrow=length(all.yrs),ncol=final.Niter))
+ colnames(SB) = colnames(TotBio) = colnames(SmryBio) = colnames(SPR) = colnames(Exploitation) = 1:final.Niter
+ rownames(SB) = rownames(TotBio) = rownames(SmryBio) = rownames(SPR) = rownames(Exploitation) = all.yrs
 
- Bratio <- Exploitation <- as.data.frame(matrix(NA,nrow=(length(all.yrs)-1),ncol=final.Niter))
- colnames(Bratio) = colnames(Exploitation) = 1:final.Niter
- rownames(Bratio) = rownames(Exploitation) = all.yrs[2]:all.yrs[length(all.yrs)]
+ Bratio <-as.data.frame(matrix(NA,nrow=(length(all.yrs)-1),ncol=final.Niter))
+ colnames(Bratio) = 1:final.Niter
+ rownames(Bratio) = all.yrs[2]:all.yrs[length(all.yrs)]
 
  OFL <- ABC <- as.data.frame(matrix(NA,nrow=length(ofl.yrs),ncol=final.Niter))
  colnames(OFL) = colnames(ABC) = 1:final.Niter 
  rownames(OFL) = rownames(ABC) = ofl.yrs
 
+ Survey <- matrix(NA, nrow = length(survey.yrs), ncol = final.Niter)
  
  #Do the final SS run
  Quant.out  <-define_matrix(N = final.Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 
@@ -421,19 +461,20 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1") }
     
     rep.new       <- readLines(file.name)
-    Quant.out[i,] <- getQuant(rep.new, parm=final.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey, ssver = SS_versionNumeric)
+    Quant.out[i,] <- getQuant(rep.new, parm=final.parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey)
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
-    RepSummary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs, ssver=SS_versionNumeric)
-    SB[,i]       <- RepSummary$SB
-    SmryBio[,i]  <- RepSummary$SmryBio
-    SPR[,i]      <- RepSummary$SPR
-    TotBio[,i]   <- RepSummary$TotBio
-    Bratio[,i]   <- RepSummary$Bratio
-    OFL[,i]      <- RepSummary$OFL
-    ABC[,i]      <- RepSummary$ForeCat
-    Exploitation[,i] <- Catch / RepSummary$TotBio
+    RepSummary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs)
+    SB[,i]       <- Summary$SB
+    SmryBio[,i]  <- Summary$SmryBio
+    SPR[,i]      <- Summary$SPR
+    TotBio[,i]   <- Summary$TotBio
+    Bratio[,i]   <- Summary$Bratio
+    OFL[,i]      <- Summary$OFL
+    ABC[,i]      <- Summary$ForeCat
+    Exploitation[,i] <- c(Catch, Summary$ForeCat) / Summary$TotBio
+    Survey[,i]   <- Summary$Survey
      
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i) 
@@ -442,17 +483,22 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  end.time <- Sys.time()
  print(end.time - start.time)
  
+ rownames(Survey) = names(Summary$Survey)
  #Remove runs Crashed Runs and where Depletion was not met
  index <- Quant.out[,"MissDep"] ==0 & Quant.out[,"Crash"] == 0
  
  Quant.out.good <- Quant.out[index,]
  rep.list[[1]]  <- TotBio[,index]
  rep.list[[2]]  <- SB[,index]
- rep.list[[3]]  <- Bratio[,index]
- rep.list[[4]]  <- OFL[,index]
- rep.list[[5]]  <- ForeCat[,index]
+ rep.list[[3]]  <- SmryBio[,index]
+ rep.list[[4]]  <- Bratio[,index]
+ rep.list[[5]]  <- SPR[,index]
+ rep.list[[6]]  <- OFL[,index]
+ rep.list[[7]]  <- ABC[,index]
+ rep.list[[8]]  <- Exploitation[,index]
+ rep.list[[9]]  <- Catch
  
- names(rep.list) <- c("TotBio", "SB", "Bratio", "OFL", "ForeCat")
+ names(rep.list) <- c("TotBio", "SB", "SmryBio", "Bratio", "SPR", "OFL", "ABC", "Exploitation", "Catch")
  
  parm.vec <- as.data.frame(Quant.out.good[,1:4]) #Replace the parm vector with only the good runs
  colnames(parm.vec) <- c("M.f", "M.m", "h", "depl")

@@ -6,8 +6,8 @@
  changeDepl <- function(dat, para) 
  {
     para   <- round(para,4)
-    dat.new    <- readLines(dat)
-    depl.line <- strsplit(dat.new[grep("FinalDepl",dat.new)]," ")[[1]]
+    dat.new   <- readLines(dat)
+    depl.line <- strsplit(dat.new[grep("FinalDepl",dat.new)],"[[:blank:]]+")[[1]]
     depl.line[4] <- para
     dat.new[grep("FinalDepl",dat.new)][[1]] <- paste(depl.line,collapse=" ")
     write(dat.new, dat)

@@ -25,17 +25,28 @@ RepSumFxn<- function(rep.new, n, all.yrs, hist.yrs, ofl.yrs)
     Bratio  = mapply(function(x) Bratio = as.numeric(strsplit(rep.new[grep(paste0("Bratio_",x),rep.new)], " ")[[1]][2]), x=all.yrs[2]:all.yrs[length(all.yrs)])
     OFL     = mapply(function(x) OFL = as.numeric(strsplit(rep.new[grep(paste("OFLCatch_",x,sep=""),rep.new)], " ")[[1]][2]), x=ofl.yrs)
     ForeCat = mapply(function(x) ForeCat = as.numeric(strsplit(rep.new[grep(paste("ForeCatch_",x,sep=""),rep.new)], " ")[[1]][2]), x=ofl.yrs)    
-    #}       
+    #}
 
-    RepSummary <- list()
-    RepSummary[[1]] <- TotBio
-    RepSummary[[2]] <- SB
-    RepSummary[[3]] <- Bratio
-    RepSummary[[4]] <- OFL
-    RepSummary[[5]] <- ForeCat
-    RepSummary[[6]] <- SPR
-    RepSummary[[7]] <- SmryBio
+    start = grep("#_survey_stdev", rep.new) + 1
+    end   = grep("#_Biomass", rep.new) - 1
 
-    names(RepSummary) <- c("TotBio", "SB","Bratio","OFL", "ForeCatch", "SPR", "SmryBio")
-    return(RepSummary)
+    df <- rep.new[start:end]
+    df <- strsplit(df, "[[:blank:]]+") ## Split by whitespace and collapse (+)
+    df <- as.list(df) 
+    df <- do.call("rbind", df)
+    Survey = noquote(df[,5]) 
+    names(Survey) = noquote(df[,1])   
+
+    Summary <- list()
+    Summary[[1]] <- TotBio
+    Summary[[2]] <- SB
+    Summary[[3]] <- Bratio
+    Summary[[4]] <- OFL
+    Summary[[5]] <- ForeCat
+    Summary[[6]] <- SPR
+    Summary[[7]] <- SmryBio
+    Summary[[8]] <- Survey
+
+    names(Summary) <- c("TotBio", "SB","Bratio","OFL", "ForeCatch", "SPR", "SmryBio", "Survey")
+    return(Summary)
  }
