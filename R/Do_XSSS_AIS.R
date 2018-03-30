@@ -178,6 +178,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 
  data.file <- SS_readdat_3.30(dat.name, verbose = FALSE)
  data.file$CPUEinfo[,"SD_Report"] = 1
+ names = c(rep("#", dim(data.file$CPUE)[1] -1), "#FinalDepl")
+ data.file$CPUE = cbind(data.file$CPUE, names)
  SS_writedat_3.30(data.file, outfile = dat.name, overwrite = T, verbose = FALSE)
  ind = data.file$fleetinfo[,"type"]
  ind = ind == 3
@@ -365,7 +367,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     print(c("Effective N:", round(effN)))
     print(c("Expected Unique Points:", round(expN)))
     print(c("Max Weight:", round(maxW,4)))
-    #print(c("Variance of the rescaled:", round(varW,4)))    
+    print(c("Variance of the rescaled:", varW))    
     if (entropy >= entropy.level) break()
                          
     #This is where sample from the new parameter values
@@ -465,7 +467,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     quant.list[[Counter+2]] <- Quant.out
     save(quant.list, file=quant.file) 
        
-    RepSummary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs)
+    Summary   <- RepSumFxn(rep.new, n=i, all.yrs, hist.yrs, ofl.yrs)
     SB[,i]       <- Summary$SB
     SmryBio[,i]  <- Summary$SmryBio
     SPR[,i]      <- Summary$SPR
@@ -474,7 +476,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     OFL[,i]      <- Summary$OFL
     ABC[,i]      <- Summary$ForeCat
     Exploitation[,i] <- c(Catch, Summary$ForeCat) / Summary$TotBio
-    Survey[,i]   <- Summary$Survey
+    Survey[,i]   <- as.numeric(Summary$Survey)
      
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i) 
@@ -497,8 +499,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  rep.list[[7]]  <- ABC[,index]
  rep.list[[8]]  <- Exploitation[,index]
  rep.list[[9]]  <- Catch
+ rep.list[[10]] <- Survey
  
- names(rep.list) <- c("TotBio", "SB", "SmryBio", "Bratio", "SPR", "OFL", "ABC", "Exploitation", "Catch")
+ names(rep.list) <- c("TotBio", "SB", "SmryBio", "Bratio", "SPR", "OFL", "ABC", "Exploitation", "Catch", "Survey")
  
  parm.vec <- as.data.frame(Quant.out.good[,1:4]) #Replace the parm vector with only the good runs
  colnames(parm.vec) <- c("M.f", "M.m", "h", "depl")
@@ -528,7 +531,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  mtext("Posterior Distributions", side = 3, outer=T)
  dev.off()
 
- create.Plots(dir = save.folder, rep.list, parm.list, quant.list = quant.good.list, 
+ create.Plots(dir = save.folder, rep.list, parm.list, quant.list = quant.good.list, dat.name,
                 all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se, n.survey)
  
  return("XSSS Completed")

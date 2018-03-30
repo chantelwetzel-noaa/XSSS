@@ -35,7 +35,7 @@ RepSumFxn<- function(rep.new, n, all.yrs, hist.yrs, ofl.yrs)
     df <- as.list(df) 
     df <- do.call("rbind", df)
     Survey = noquote(df[,5]) 
-    names(Survey) = noquote(df[,1])   
+    #names(Survey) = noquote(df[,1])   
 
     Summary <- list()
     Summary[[1]] <- TotBio

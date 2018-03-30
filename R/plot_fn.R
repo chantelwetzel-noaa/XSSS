@@ -3,6 +3,7 @@
 ##' @param rep.list timeseries list
 ##' @param parm.list
 ##' @param quant.list
+##' @param data.list
 ##' @param all.yrs
 ##' @param ofl.yrs
 ##' @param hist.yrs
@@ -13,7 +14,7 @@
 ##' @param n.survey
 ##' @author Chantel Wetzel
 ##' @export
-create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list,
+create.Plots <- function(dir = save.folder, rep.list, parm.list, quant.list, dat.name,
 						 all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se, n.survey){
 
 	#Get the colors for the polygons
