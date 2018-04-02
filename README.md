@@ -1,4 +1,4 @@
-#Extended Simple Stock Synthesis 
+## Extended Simple Stock Synthesis 
 
 Extended Simple Stock Synthesis (XSSS) is an assessment method for application to data-limited stocks.  XSSS uses adaptive importance sampling to update parameter priors based upon index data.  
 
@@ -8,7 +8,7 @@ Extended Simple Stock Synthesis (XSSS) is an assessment method for application t
 
 ```S
 install.packages("devtools")
-devtools::install_github("XSSS_AIS")
+devtools::install_github("XSSS")
 ```
 
 Note: devtools may give this message: "*WARNING: Rtools is required to build R packages, but is not currently installed.*" However, Rtools is NOT required for installing r4ss via devtools, so ignore the warning.
@@ -17,4 +17,8 @@ Once you have installed the r4ss package, it can be loaded using:
 
 ```S
 library(xsss)
-````
+```
+
+## Setting up a model
+
+## Running XSSS
