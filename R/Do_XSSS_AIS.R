@@ -5,16 +5,16 @@
 ##' @param filepath = parent directory above the folder with the model files 
 ##' @param control.name 
 ##' @param dat.name
-##' @param tantalus = TRUE/FALSE
-##' @param read.seed = TRUE/FALSE
+##' @param tantalus = TRUE/FALSE,  Option for use with linux systems, NWFSC specific
+##' @param read.seed = TRUE/FALSE, Option to allow the user to predefine seeds from previous model run, reads the seed_list file
 ##' @param Niter number of initial model runs
 ##' @param AIS.iter number of AIS model runs
 ##' @param final.Niter number of final model runs, recommened to be greater than N.iter and AIS.iter
 ##' @param m.in = c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed
-##' @param h.in = c(prior mean, prior stdev, lower bound, upper bound) which is a truncated beta
-##' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution) 
-##' @param fmsy.m.in
-##' @param bmsy.b0.in
+##' @param h.in = c(prior mean, prior stdev, lower bound, upper bound, distribution (trunacted beta only))
+##' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution (1 = truncated beta, 2 = lognormal)) 
+##' @param fmsy.m.in NOT YET FULLY IMPLEMENTED
+##' @param bmsy.b0.in NOT YET FULLY IMPLEMENTED
 ##' @author Chantel Wetzel
 ##' @export
 ##' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
