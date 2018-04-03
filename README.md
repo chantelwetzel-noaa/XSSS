@@ -25,7 +25,11 @@ XSSS is data-limited assessment approach for application when only catches and i
 
 ## Running XSSS
 
-Example model files and calls to the main function are included in the "example" folder. The user must define distributions for three parameters: natural mortality, steepness, and relative stock status is a specific year.
+The user must define distributions for three parameters: natural mortality, steepness, and relative stock status is a specific year. Example model files and calls to the main function are included in the "example" folder.  Please see the vignette for additional information.
+
+## Software requirements
+
+XSSS is written to work with Stock Synthesis version 3.30.11 or later. The latest version of Stock Synthesis and user manual is available on NOAA Vlab. A user account may be created for non-NOAA indivuals by contacting chantel.wetzel@noaa.gov. An executable for Stock Synthesis version 3.30.11 is included in the "examples" folder.
 
 ## Description of package
 
