@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Chantel Wetzel" />
+
+<meta name="date" content="2018-04-04" />
+
+<title>Introduction to Extended Simple Stock Synthesis</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to Extended Simple Stock Synthesis</h1>
+<h4 class="author"><em>Chantel Wetzel</em></h4>
+<h4 class="date"><em>2018-04-04</em></h4>
+
+
+
+<p><strong>xsss</strong> is a package for Extended Simple Stock Synthesis which was designed for data-limited assessments that use catch and indices of abundance data. XSSS is an extension to Simple Stock Synthesis which calculates a time-series of abundance based on priors for natural mortality, steepness, and stock status in a specific year (Simple Stock Synthesis can be found here: <a href="https://github.com/shcaba/SSS" class="uri">https://github.com/shcaba/SSS</a>). XSSS applies priors for natural mortality, steepness, and stock status, but uses adaptive importance sampling to update the priors based upon index of abundance data to estimate posterior distributions for each parameter resulting in time-series estimates based on information in the index data.</p>
+<div id="software-requirements" class="section level2">
+<h2>Software requirements</h2>
+<p><strong>xsss</strong> is designed for use with Stock Synthesis version 3.30.11 or greater. The executable and additional information regarding Stock Synthesis is available on NOAA Vlab (<a href="https://vlab.ncep.noaa.gov/" class="uri">https://vlab.ncep.noaa.gov/</a>) which is accessible to all NOAA employees. Access is also available to outside collaborators after creation of a user account. If you are not a NOAA employee and would like to join the Stock Synthesis group on Vlab please email <a href="mailto:chantel.wetzel@noaa.gov">chantel.wetzel@noaa.gov</a>.</p>
+</div>
+<div id="setting-up-a-model" class="section level2">
+<h2>Setting up a model</h2>
+<p><strong>xsss</strong> works using Stock Synthesis which allows the user to create a model with multiple fisheries and surveys if appropriate. Stock Synthesis is an age-based population dynamics model. The user needs to provide four input files for Stock Synthesis: starter, forecast, data, and control file. An advantage for using Stock Synthesis is the flexibility for the user to define simple of complex biology (e.g., sex specific growth, fecundity relationships) and fishery dynamics (e.g., selectivity of fisheries and surveys).</p>
+</div>
+<div id="data-file" class="section level2">
+<h2>Data file</h2>
+<p>The data file used for <strong>xsss</strong> mimics a data file that would be used for a typical Stock Synthesis except in a couple notable locations. The number of fleets specified in the model needs to be changed to N+1 to include an additional depletion survey. The depletion survey is defined similar to other surveys in Stock Synthesis where a list of fishery and survey fleet information is expected prior to the catch data where:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Fleet_type
+</th>
+<th style="text-align:left;">
+Timing
+</th>
+<th style="text-align:left;">
+Area
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Catch_mult
+</th>
+<th style="text-align:left;">
+Fleet_name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+-1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+Fishery
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1007
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+Survey
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1001
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+Depletion_Survey
+</td>
+</tr>
+</tbody>
+</table>
+<p>The above example is for a model with one fishery and one survey with an index of abundance.</p>
+<p>Specification for the depletion survey must also be defined at the top of index of abundance data section. The depletion survey is define using option 34 in the “Units” column for Stock Synthesis.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Fleet_number
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Error_Type
+</th>
+<th style="text-align:left;">
+Extra_SD_Reported
+</th>
+<th style="text-align:left;">
+Fleet_name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Fishery
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Survey
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+34
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Depletion_Survey
+</td>
+</tr>
+</tbody>
+</table>
+<p>The depletion survey should include two data points, one for the first year of the model where the stock is assumed to be a specific fraction of the unfished biomass and a second for the depletion value for a specific model year. The depletion survey should be entered at the bottom of the index of abundance data section as:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Year
+</th>
+<th style="text-align:left;">
+Month
+</th>
+<th style="text-align:left;">
+Fleet
+</th>
+<th style="text-align:left;">
+Observation
+</th>
+<th style="text-align:left;">
+Standard_Error
+</th>
+<th style="text-align:left;">
+Fleet_name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1918
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0.001
+</td>
+<td style="text-align:left;">
+# Initial Depletion
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2000
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+0.4
+</td>
+<td style="text-align:left;">
+0.001
+</td>
+<td style="text-align:left;">
+# Final Depletion
+</td>
+</tr>
+</tbody>
+</table>
+<p>where the above example has the depeltion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000. The model is forced to fit the depletion survey by setting a very small standard error value (&gt;0.001).</p>
+</div>
+<div id="control-file" class="section level2">
+<h2>Control file</h2>
+</div>
+<div id="forecast-file" class="section level2">
+<h2>Forecast file</h2>
+</div>
+<div id="starter-file" class="section level2">
+<h2>Starter file</h2>
+</div>
+<div id="call-to-the-xsss-function" class="section level2">
+<h2>Call to the xsss function</h2>
+<p>The following inputs are required when calling <strong>xsss</strong>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">SSS.ais.fxn</span>(<span class="dt">filepath =</span> <span class="st">&quot;C:/My_Directory/.../&quot;</span>,
+            <span class="dt">control.name =</span> <span class="st">&quot;control_file.ctl&quot;</span>, 
+            <span class="dt">dat.name =</span> <span class="st">&quot;data_file.dat&quot;</span>, 
+            <span class="dt">m.in =</span> <span class="kw">c</span>(<span class="fl">0.28</span>, <span class="fl">0.27</span>,<span class="fl">0.40</span>,<span class="fl">0.40</span>, <span class="dv">0</span>), 
+            <span class="dt">h.in =</span> <span class="kw">c</span>(<span class="fl">0.87</span>, <span class="fl">0.093</span>, <span class="fl">0.20</span>, <span class="dv">1</span>, <span class="dv">1</span>), 
+            <span class="dt">depl.in =</span> <span class="kw">c</span>(<span class="fl">0.60</span>, <span class="fl">0.10</span>, <span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="dv">1</span>) <span class="co">#</span>
+            )</code></pre></div>
+<p>where:</p>
+<ul>
+<li><p>filepath is the parent directory which contains the Stock Synthesis executable and each of the four model files. The function will copy and move each of these items into a folder named run where the model will run, preserving the original files in the filepath location</p></li>
+<li><p>control.name is the name of the control file. This will be used to locate the file to copy and move to the run folder. Additionally, the code will identify this file by name to modify values of natural mortality and steepness for each model iteration.</p></li>
+<li><p>dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder. Addtionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.</p></li>
+<li><p>m.in is a vector of median natural mortality, standard deviation, and whethere female and male natural mortality should be assumed equal. The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).</p></li>
+<li><p>h.in is a vector of mean steepness, standard devation, and lower and upper bounds for the truncated beta distribution. The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.</p></li>
+<li><p>depl.in is a vector of mean relative stock status (aka “depletion” from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the funciton is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)). If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.</p></li>
+</ul>
+<p>The function has default values for other inputs to the function that can be overridden by the user. The full function call will all inputs is:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">SSS.ais.fxn</span>(<span class="dt">filepath =</span> <span class="st">&quot;C:/My_Directory/.../&quot;</span>, 
+            <span class="dt">control.name =</span> <span class="st">&quot;control_file.ctl&quot;</span>, 
+            <span class="dt">dat.name =</span> <span class="st">&quot;data_file.dat&quot;</span>, 
+            <span class="dt">tantalus =</span> <span class="ot">FALSE</span>, 
+            <span class="dt">read.seed =</span> <span class="ot">FALSE</span>, 
+            <span class="dt">entropy.level =</span> <span class="fl">0.92</span>, 
+            <span class="dt">Niter =</span> <span class="dv">2000</span>, 
+            <span class="dt">AIS.iter =</span> <span class="dv">2000</span>, 
+            <span class="dt">final.Niter =</span> <span class="dv">5000</span>, 
+            <span class="dt">m.in =</span> <span class="kw">c</span>(<span class="fl">0.28</span>, <span class="fl">0.27</span>,<span class="fl">0.40</span>,<span class="fl">0.40</span>, <span class="dv">0</span>), 
+            <span class="dt">h.in =</span> <span class="kw">c</span>(<span class="fl">0.87</span>, <span class="fl">0.093</span>, <span class="fl">0.20</span>, <span class="dv">1</span>, <span class="dv">1</span>), 
+            <span class="dt">depl.in =</span> <span class="kw">c</span>(<span class="fl">0.60</span>, <span class="fl">0.10</span>, <span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="dv">1</span>), 
+            <span class="dt">fmsy.m.in =</span> <span class="ot">NULL</span>, 
+            <span class="dt">bmsy.b0.in =</span> <span class="ot">NULL</span> 
+            ) </code></pre></div>
+<p>where</p>
+<ul>
+<li><p>tantalus is an option for use with linux based machines. This has only been tested on the NWFSC system and may not work in general application.</p></li>
+<li><p>read.seed is an option allowing the user to use the same seeds from a previous run. The package will read the seed_list file to set seeds.</p></li>
+<li><p>entropy.level is the level of entropy that must be met prior to finishing adapative importance sampling.</p></li>
+<li><p>Niter is the number of initial model runs for MCMC drawing from the prior distributions.</p></li>
+<li><p>AIS.inter is the number of model runs during the adaptive importance sampling where the priors are updated based upon the index data.</p></li>
+<li><p>final.Niter is the number of final model runs drawing from the posterior distributions for each parameter.</p></li>
+<li><p>fmsy.m.in and bmsy.b0.in inputs are currently not fully implemented.</p></li>
+</ul>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>Example function calls and model files are located in the examples folder.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

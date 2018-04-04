@@ -1,0 +1,155 @@
+---
+title: "Introduction to Extended Simple Stock Synthesis"
+author: "Chantel Wetzel"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Extended Simple Stock Synthesis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+**xsss** is a package for Extended Simple Stock Synthesis which was designed for data-limited assessments that use catch and indices of abundance data. XSSS is an extension to Simple Stock Synthesis which calculates a time-series of abundance based on priors for natural mortality, steepness, and stock status in a specific year (Simple Stock Synthesis can be found here: https://github.com/shcaba/SSS).  XSSS applies priors for natural mortality, steepness, and stock status, but uses adaptive importance sampling to update the priors based upon index of abundance data to estimate posterior distributions for each parameter resulting in time-series estimates based on information in the index data.  
+
+## Software requirements
+
+**xsss** is designed for use with Stock Synthesis version 3.30.11 or greater.  The executable and additional information regarding Stock Synthesis is available on NOAA Vlab (https://vlab.ncep.noaa.gov/) which is accessible to all NOAA employees.  Access is also available to outside collaborators after creation of a user account.  If you are not a NOAA employee and would like to join the Stock Synthesis group on Vlab please email chantel.wetzel@noaa.gov.  
+
+## Setting up a model
+
+**xsss** works using Stock Synthesis which allows the user to create a model with multiple fisheries and surveys if appropriate.  Stock Synthesis is an age-based population dynamics model.  The user needs to provide four input files for Stock Synthesis: starter, forecast, data, and control file.  An advantage for using Stock Synthesis is the flexibility for the user to define simple of complex biology (e.g., sex specific growth, fecundity relationships) and fishery dynamics (e.g., selectivity of fisheries and surveys).  
+
+
+## Data file
+The data file used for **xsss** mimics a data file that would be used for a typical Stock Synthesis except in a couple notable locations.  The number of fleets specified in the model needs to be changed to N+1 to include an additional depletion survey. The depletion survey is defined similar to other surveys in Stock Synthesis where a list of fishery and survey fleet information is expected prior to the catch data where: 
+
+```{r, results = 'asis', echo = FALSE}
+  library(xtable)
+  library(kableExtra)
+
+  tab = rbind( c(1, -1, 1, 1, 0, "Fishery"),
+               c(3, 1007, 1, 1, 0, "Survey" ),
+               c(3, 1001, 1, 1, 0, "Depletion_Survey"))
+  
+  colnames(tab) = c("Fleet_type", "Timing", "Area", "Units", "Catch_mult", "Fleet_name")
+  
+  table = tab 
+  kable(table, "html")
+```
+
+The above example is for a model with one fishery and one survey with an index of abundance.
+
+Specification for the depletion survey must also be defined at the top of index of abundance data section.  The depletion survey is define using option 34 in the "Units" column for Stock Synthesis.
+
+```{r, results = 'asis', echo = FALSE}
+  library(xtable)
+  library(kableExtra)
+
+  tab = rbind( c(1, 1, 0, 1, "# Fishery"),
+               c(2, 1, 0, 1, "# Survey" ),
+               c(3, 34, 0, 1,"# Depletion_Survey"))
+  
+  colnames(tab) = c("Fleet_number", "Units", "Error_Type", "Extra_SD_Reported", "Fleet_name")
+  
+  table = tab 
+  kable(table, "html")
+```
+
+The depletion survey should include two data points, one for the first year of the model where the stock is assumed to be a specific fraction of the unfished biomass and a second for the depletion value for a specific model year.  The depletion survey should be entered at the bottom of the index of abundance data section as: 
+
+```{r, results = 'asis', echo = FALSE}
+  library(xtable)
+  library(kableExtra)
+
+  tab = rbind( c(1918, 1, 3, 1, 0.001, "# Initial Depletion"),
+               c(2000, 1, 3, 0.40, 0.001, "# Final Depletion"))
+  
+  colnames(tab) = c("Year", "Month", "Fleet", "Observation", "Standard_Error", "Fleet_name")
+  
+  table = tab 
+  kable(table, "html")
+```
+
+where the above example has the depeltion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000.  The model is forced to fit the depletion survey by setting a very small standard error value (>0.001).
+
+## Control file
+
+## Forecast file
+
+## Starter file
+
+## Call to the xsss function
+
+The following inputs are required when calling **xsss**:
+
+```{r, call, eval = FALSE}
+SSS.ais.fxn(filepath = "C:/My_Directory/.../",
+            control.name = "control_file.ctl", 
+            dat.name = "data_file.dat", 
+            m.in = c(0.28, 0.27,0.40,0.40, 0), 
+            h.in = c(0.87, 0.093, 0.20, 1, 1), 
+            depl.in = c(0.60, 0.10, 0.01, 0.99, 1) #
+            )
+```
+
+where:
+
+* filepath is the parent directory which contains the Stock Synthesis executable and each of the four model files. The function will copy and move each of these items into a folder named run where the model will run, preserving the original files in the filepath location
+
+* control.name is the name of the control file. This will be used to locate the file to copy and move to the run folder. Additionally, the code will identify this file by name to modify values of natural mortality and steepness for each model iteration.
+
+* dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder.  Addtionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.
+
+* m.in is a vector of median natural mortality, standard deviation, and whethere female and male natural mortality should be assumed equal.  The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).
+
+* h.in is a vector of mean steepness, standard devation, and lower and upper bounds for the truncated beta distribution.  The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.
+
+* depl.in is a vector of mean relative stock status (aka "depletion" from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the funciton is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)).  If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.
+
+The function has default values for other inputs to the function that can be overridden by the user.  The full function call will all inputs is: 
+
+
+```{r, full_call, eval = FALSE}
+SSS.ais.fxn(filepath = "C:/My_Directory/.../", 
+            control.name = "control_file.ctl", 
+            dat.name = "data_file.dat", 
+            tantalus = FALSE, 
+            read.seed = FALSE, 
+            entropy.level = 0.92, 
+            Niter = 2000, 
+            AIS.iter = 2000, 
+            final.Niter = 5000, 
+            m.in = c(0.28, 0.27,0.40,0.40, 0), 
+            h.in = c(0.87, 0.093, 0.20, 1, 1), 
+            depl.in = c(0.60, 0.10, 0.01, 0.99, 1), 
+            fmsy.m.in = NULL, 
+            bmsy.b0.in = NULL 
+            ) 
+```
+
+where
+
+* tantalus is an option for use with linux based machines.  This has only been tested on the NWFSC system and may not work in general application.
+
+* read.seed is an option allowing the user to use the same seeds from a previous run. The package will read the seed_list file to set seeds.
+
+* entropy.level is the level of entropy that must be met prior to finishing adapative importance sampling.
+
+* Niter is the number of initial model runs for MCMC drawing from the prior distributions. 
+
+* AIS.inter is the number of model runs during the adaptive importance sampling where the priors are updated based upon the index data.
+
+* final.Niter is the number of final model runs drawing from the posterior distributions for each parameter.
+
+* fmsy.m.in and bmsy.b0.in inputs are currently not fully implemented.
+
+## Examples
+Example function calls and model files are located in the examples folder.
+

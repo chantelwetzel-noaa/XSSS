@@ -5,12 +5,12 @@ SSS.ais.fxn(filepath = "C:/My_Directory/.../", # parent directory to the file.na
             control.name = "control_file.ctl", # name of the model control file
             dat.name = "data_file.dat", # name of the model data file
             m.in = c(0.28, 0.27,0.40,0.40, 0), # c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes))
-            h.in = c(0.87, 0.093, 0.20, 1, 1), # c(steepness, mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta))
+            h.in = c(0.87, 0.093, 0.20, 1, 1), # c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta))
             depl.in = c(0.60, 0.10, 0.01, 0.99, 1) #c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal))
             )
 
 
-# Function call with all inputs specified
+# Function call with all inputs are specified
 SSS.ais.fxn(filepath = "C:/My_Directory/.../", 
             control.name = "control_file.ctl", 
             dat.name = "data_file.dat", 
