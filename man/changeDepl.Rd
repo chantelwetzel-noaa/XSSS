@@ -7,6 +7,8 @@
 changeDepl(dat, para)
 }
 \arguments{
+\item{dat}{}
+
 \item{para}{depletion parameter value for the nth simulation}
 }
 \description{

@@ -9,18 +9,17 @@ The final sample is performed using the weights that exceeded entropy threshold}
 \usage{
 SSS.ais.fxn(filepath, control.name, dat.name, tantalus = FALSE,
   read.seed = FALSE, entropy.level = 0.92, Niter = 2000,
-  AIS.iter = 2000, final.Niter = 5000, m.in, h.in, depl.in)
+  AIS.iter = 2000, final.Niter = 5000, m.in, h.in, depl.in,
+  fmsy.m.in = NULL, bmsy.b0.in = NULL)
 }
 \arguments{
 \item{filepath}{= parent directory above the folder with the model files}
 
-\item{control.name}{= paste(file.name,".ctl",sep="")}
+\item{control.name}{}
 
-\item{dat.name}{= paste(file.name,".dat",sep="")}
+\item{tantalus}{= TRUE/FALSE,  Option for use with linux systems, NWFSC specific}
 
-\item{tantalus}{= TRUE/FALSE}
-
-\item{read.seed}{= TRUE/FALSE}
+\item{read.seed}{= TRUE/FALSE, Option to allow the user to predefine seeds from previous model run, reads the seed_list file}
 
 \item{Niter}{number of initial model runs}
 
@@ -30,15 +29,13 @@ SSS.ais.fxn(filepath, control.name, dat.name, tantalus = FALSE,
 
 \item{m.in}{= c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed}
 
-\item{h.in}{= c(prior mean, prior stdev, lower bound, upper bound) which is a truncated beta}
+\item{h.in}{= c(prior mean, prior stdev, lower bound, upper bound, distribution (trunacted beta only))}
 
-\item{depl.in}{= c(0.50, 0.20, 0.01, 0.99, distribution)}
+\item{depl.in}{= c(0.50, 0.20, 0.01, 0.99, distribution (1 = truncated beta, 2 = lognormal))}
 
-\item{hist.yrs}{= the model years; seq(1916,2012,1)}
+\item{fmsy.m.in}{NOT YET FULLY IMPLEMENTED}
 
-\item{ofl.yrs}{= years to calculate ofl values; seq(2013,2016,1)}
-
-\item{depl.yr}{Model year associatted with the final index value, does not need to be final model year}
+\item{bmsy.b0.in}{NOT YET FULLY IMPLEMENTED}
 }
 \description{
 This the main AIS code

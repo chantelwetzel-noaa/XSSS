@@ -4,10 +4,7 @@
 \alias{getQuant}
 \title{Function to pull quantities}
 \usage{
-getQuant(rep.new, parm, ofl.yrs, depl.yr, n.extra.se, n.survey, ssver)
-}
-\arguments{
-\item{ssver}{model version}
+getQuant(rep.new, parm, ofl.yrs, depl.yr, n.extra.se, n.survey)
 }
 \description{
 Function to pull quantities

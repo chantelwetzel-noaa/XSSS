@@ -4,8 +4,8 @@
 \alias{create.Plots}
 \title{Changes the natural mortality value for female and male fish in the control file}
 \usage{
-create.Plots(dir = save.folder, rep.list, parm.list, quant.list, all.yrs,
-  ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se, n.survey)
+create.Plots(dir = save.folder, rep.list, parm.list, quant.list, dat.name,
+  all.yrs, ofl.yrs, hist.yrs, depl.in, m.in, h.in, n.extra.se, n.survey)
 }
 \arguments{
 \item{dir}{the folder where plots and tables will be saved}

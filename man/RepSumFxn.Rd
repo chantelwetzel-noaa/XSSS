@@ -4,7 +4,7 @@
 \alias{RepSumFxn}
 \title{Get Final Run Model Output}
 \usage{
-RepSumFxn(rep.new, n, all.yrs, hist.yrs, ofl.yrs, ssver)
+RepSumFxn(rep.new, n, all.yrs, hist.yrs, ofl.yrs)
 }
 \arguments{
 \item{rep.new}{report file name to pull summary values from}
@@ -16,8 +16,6 @@ RepSumFxn(rep.new, n, all.yrs, hist.yrs, ofl.yrs, ssver)
 \item{hist.yrs}{}
 
 \item{ofl.yrs}{}
-
-\item{ssvers}{}
 }
 \description{
 Get Final Run Model Output
