@@ -168,7 +168,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  starter.file$datafile <- dat.name
  starter.file$ctlfile <- control.name
  starter.file$run_display_detail <- 0
- starter.file$detailed_age_structrure <- 2
+ starter.file$detailed_age_structure <- 2
  starter.file$last_estimation_phase <- 5
  starter.file$parmtrace <- 0
  starter.file$cumreport <- 0
@@ -243,7 +243,9 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  rawctl <- read.table(file= control.name , col.names = 1:20, fill = TRUE, quote = "", 
         colClasses = "character", nrows = -1, comment.char = "")
 
- temp <- matchfun(string = "extra_se", obj = rawctl[,5])
+ for(a in 1:10){
+    temp <- matchfun(string = "extra_se", obj = rawctl[,a])
+    if(!is.na(temp)) { break() } }
  temp2<- as.numeric(rawctl[(temp+1):(temp+2),4])
  include.extra.se <- ifelse(sum(temp2)==0, FALSE, TRUE)
  # How many surveys have added se?
@@ -251,7 +253,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 
 # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
- starter.file$detailed_age_structrure <- 0
+ starter.file$detailed_age_structure <- 0
  SS_writestarter(starter.file,file="starter.ss",overwrite=T, verbose=FALSE, warn=FALSE)
 
 
