@@ -165,6 +165,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  
  # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
+ starter.file$datafile <- dat.name
+ starter.file$ctlfile <- control.name
  starter.file$run_display_detail <- 0
  starter.file$detailed_age_structrure <- 2
  starter.file$last_estimation_phase <- 5

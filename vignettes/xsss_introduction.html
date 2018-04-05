@@ -12,7 +12,7 @@
 
 <meta name="author" content="Chantel Wetzel" />
 
-<meta name="date" content="2018-04-04" />
+<meta name="date" content="2018-04-05" />
 
 <title>Introduction to Extended Simple Stock Synthesis</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Introduction to Extended Simple Stock Synthesis</h1>
 <h4 class="author"><em>Chantel Wetzel</em></h4>
-<h4 class="date"><em>2018-04-04</em></h4>
+<h4 class="date"><em>2018-04-05</em></h4>
 
 
 
@@ -315,16 +315,187 @@ Fleet_name
 </tr>
 </tbody>
 </table>
-<p>where the above example has the depeltion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000. The model is forced to fit the depletion survey by setting a very small standard error value (&gt;0.001).</p>
+<p>where the above example has the depletion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000. The model is forced to fit the depletion survey by setting a very small standard error value (&gt;0.001). <strong>xsss</strong> will plug in alternative depletion values for the final depletion year based on draws from either the prior or posterior distribution.</p>
+<p>No additional edits for the depletion survey is required within the data file. However, all additional required inputs for the data file (e.g., discard, length and age bins) need to be specified. Please see example files within the example folder.</p>
 </div>
 <div id="control-file" class="section level2">
 <h2>Control file</h2>
-</div>
-<div id="forecast-file" class="section level2">
-<h2>Forecast file</h2>
+<p>The control file for <strong>xsss</strong> is nearly identical to a control file for a full Stock Synthesis based model. The control file contains the biological parameters, stock recriutment relationship, and selectivity. <strong>xsss</strong> only estimates a single parameter, log(R0), which is solved for by the model based upon the fixed parameter values, the catch history, and the depletion survey value. The estimation phase for all other parameters in the control file need to be set to a negative value to avoid estimation.</p>
+<p><strong>xsss</strong> modifies the fixed parameters for natural mortality (both sexes) and steepness. The code currently matches a string in order to correctly identify the parameter lines that need to be modified. In order for the package to correctly identify these parameter lines they need to be labeled with the default Stock Synthesis labeling created in the ss_new files. The expected strings are:</p>
+<ul>
+<li><p>NatM_p_1_Fem_GP_1 for female natural mortality,</p></li>
+<li><p>NatM_p_1_Mal_GP_1 for male natural mortality, and</p></li>
+<li><p>SR_BH_steep for steepness.</p></li>
+</ul>
+<p><strong>xsss</strong> currently is only configured for a constant natural mortality value across ages for a single area based model. The parameter offset approach between sexes for biological parameters should not be selected when setting up a controlf file for <strong>xsss</strong>. If natural mortality is selected to be equal between sexes, the package still expects that each parameter be set up for each sex where the code will fix the parameter equal for each at the drawn MCMC value.</p>
+<p><strong>xsss</strong> assumes deterministic recruitment with recruitment being estimated directly from the selected stock recruitment curve. Hence, recruitment deviation estimation in Stock Synthesis needs to be turned off (“0 #do_recdev”). Additionally, all phases for recruitment deviation estimates need to be set to a negative phase.</p>
+<p>The model required the depletion survey to have defined parameters for Q and selectivity similar to all other surveys in the model. An example set-up for the Q parameter section is:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Fleet
+</th>
+<th style="text-align:left;">
+Link
+</th>
+<th style="text-align:left;">
+Link_info
+</th>
+<th style="text-align:left;">
+Extra_SE
+</th>
+<th style="text-align:left;">
+Bias_adj
+</th>
+<th style="text-align:left;">
+Float
+</th>
+<th style="text-align:left;">
+Fleet_name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Survey
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Depletion Survey
+</td>
+</tr>
+</tbody>
+</table>
+<p>The “Link_info” for the depletion survey should be set to option 2, which requires to model to run through all phases when using this special survey option. Additionally, the “Float” option needs to be set to option 1 for all surveys which allows the model to analytically calculate the Q value for each survey, where the depeltion survey Q value will be equal to 1. In the example above, two additional parameter lines are required for the Q parameter section for the estimation of ln(Q) parameter.</p>
+<p>Selectivity must be defined for each fleet in the model, including the depeltion survey. Since <strong>xsss</strong> uses Stock Synthesis the user is able to define the selectivity curve that is most appropriate for the fishery or survey (e.g., selectivity equal to maturity, dome-shaped). An example length-based selectivity pattern block set-up is:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+Pattern
+</th>
+<th style="text-align:left;">
+Discard
+</th>
+<th style="text-align:left;">
+Male
+</th>
+<th style="text-align:left;">
+Special
+</th>
+<th style="text-align:left;">
+Fleet_name
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+# Fishery
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+# Survey
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+# Depletion Survey
+</td>
+</tr>
+</tbody>
+</table>
+<p>where this specification sets the fishery selectivity to a two-parameter logistic curvey and the survey selectivity mirrors (Pattern = 15) the fishery selectivity (Special = 1, the fishery fleet number). The depletion survey is set to pattern 10 where all fish greater tahn the first length bin have are fully selected. Alternatively, age-based selectivity may be used for fisheries and surveys and would be defined in a similar fashion using the age-selectivity pattern block. All selectivity parameters should be fixed at the input parameter values, and hence should be considered carefully.</p>
 </div>
 <div id="starter-file" class="section level2">
 <h2>Starter file</h2>
+<p>The starter file is modified by <strong>xsss</strong>. The user is required to set-up an initial starter file. However, <strong>xsss</strong> performs checks and modifies input values as required (e.g., turn off report file writing for speed, set paramter jitter equal to 0).</p>
+</div>
+<div id="forecast-file" class="section level2">
+<h2>Forecast file</h2>
+<p><strong>xsss</strong> does not do any adjustments to the forecast file. The user needs to carefully consider the set-up of this file. Within the forecast file, the target harvest rate, the control rule, and adjustments to the estimated overfishing limit is defined by the user. Additionally, harvest may be fixed at a pre-determined value for select years during the forecast period to reflect a management system where harvest limits have already be set by management for specific years. An example set-up for a West Coast groundfish stock assessment is provided in the example folder.</p>
+</div>
+<div id="visualizing-model-set-up" class="section level2">
+<h2>Visualizing model set-up</h2>
+<p>Once all files have been set-up by the user the Stock Synthesis executable should be run to ensure that all files have been defined properly. The executable may be run from a command window using the command “ss -nohess”. If the model fails to run, the echoinput file can be used to determine where the reading of the input files failed. After configuring a running model the user should confirm that only the log(R0) parameter is estimated by the model. The results from a model run can be visualized using the <strong>r4ss</strong> package which can be located here: <a href="https://github.com/r4ss" class="uri">https://github.com/r4ss</a>. Once the <strong>r4ss</strong> package is installed the model may be read into R and visualized by:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model =<span class="st"> </span><span class="kw">SS_output</span>(<span class="st">&quot;C:/My_Directory/.../&quot;</span>)
+<span class="kw">SS_plots</span>(model)</code></pre></div>
 </div>
 <div id="call-to-the-xsss-function" class="section level2">
 <h2>Call to the xsss function</h2>
@@ -340,10 +511,10 @@ Fleet_name
 <ul>
 <li><p>filepath is the parent directory which contains the Stock Synthesis executable and each of the four model files. The function will copy and move each of these items into a folder named run where the model will run, preserving the original files in the filepath location</p></li>
 <li><p>control.name is the name of the control file. This will be used to locate the file to copy and move to the run folder. Additionally, the code will identify this file by name to modify values of natural mortality and steepness for each model iteration.</p></li>
-<li><p>dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder. Addtionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.</p></li>
-<li><p>m.in is a vector of median natural mortality, standard deviation, and whethere female and male natural mortality should be assumed equal. The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).</p></li>
-<li><p>h.in is a vector of mean steepness, standard devation, and lower and upper bounds for the truncated beta distribution. The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.</p></li>
-<li><p>depl.in is a vector of mean relative stock status (aka “depletion” from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the funciton is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)). If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.</p></li>
+<li><p>dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder. Additionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.</p></li>
+<li><p>m.in is a vector of median natural mortality, standard deviation, and whether female and male natural mortality should be assumed equal. The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).</p></li>
+<li><p>h.in is a vector of mean steepness, standard deviation, and lower and upper bounds for the truncated beta distribution. The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.</p></li>
+<li><p>depl.in is a vector of mean relative stock status (aka “depletion” from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the function is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)). If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.</p></li>
 </ul>
 <p>The function has default values for other inputs to the function that can be overridden by the user. The full function call will all inputs is:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">SSS.ais.fxn</span>(<span class="dt">filepath =</span> <span class="st">&quot;C:/My_Directory/.../&quot;</span>, 
@@ -365,7 +536,7 @@ Fleet_name
 <ul>
 <li><p>tantalus is an option for use with linux based machines. This has only been tested on the NWFSC system and may not work in general application.</p></li>
 <li><p>read.seed is an option allowing the user to use the same seeds from a previous run. The package will read the seed_list file to set seeds.</p></li>
-<li><p>entropy.level is the level of entropy that must be met prior to finishing adapative importance sampling.</p></li>
+<li><p>entropy.level is the level of entropy that must be met prior to finishing adaptive importance sampling.</p></li>
 <li><p>Niter is the number of initial model runs for MCMC drawing from the prior distributions.</p></li>
 <li><p>AIS.inter is the number of model runs during the adaptive importance sampling where the priors are updated based upon the index data.</p></li>
 <li><p>final.Niter is the number of final model runs drawing from the posterior distributions for each parameter.</p></li>

@@ -77,13 +77,79 @@ The depletion survey should include two data points, one for the first year of t
   kable(table, "html")
 ```
 
-where the above example has the depeltion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000.  The model is forced to fit the depletion survey by setting a very small standard error value (>0.001).
+where the above example has the depletion survey as fleet 3 where the stock is assumed in an unfished state in 1918 and depleted to 40% of unfished biomass in year 2000.  The model is forced to fit the depletion survey by setting a very small standard error value (>0.001).  **xsss** will plug in alternative depletion values for the final depletion year based on draws from either the prior or posterior distribution.  
+
+No additional edits for the depletion survey is required within the data file.  However, all additional required inputs for the data file (e.g., discard, length and age bins) need to be specified. Please see example files within the example folder.
 
 ## Control file
+The control file for **xsss** is nearly identical to a control file for a full Stock Synthesis based model.  The control file contains the biological parameters, stock recriutment relationship, and selectivity. **xsss** only estimates a single parameter, log(R0), which is solved for by the model based upon the fixed parameter values, the catch history, and the depletion survey value.  The estimation phase for all other parameters in the control file need to be set to a negative value to avoid estimation.
+
+**xsss** modifies the fixed parameters for natural mortality (both sexes) and steepness.  The code currently matches a string in order to correctly identify the parameter lines that need to be modified.  In order for the package to correctly identify these parameter lines they need to be labeled with the default Stock Synthesis labeling created in the ss_new files.  The expected strings are: 
+
+* NatM_p_1_Fem_GP_1 for female natural mortality, 
+
+* NatM_p_1_Mal_GP_1 for male natural mortality, and
+
+* SR_BH_steep for steepness.  
+
+**xsss** currently is only configured for a constant natural mortality value across ages for a single area based model.  The parameter offset approach between sexes for biological parameters should not be selected when setting up a controlf file for **xsss**.  If natural mortality is selected to be equal between sexes, the package still expects that each parameter be set up for each sex where the code will fix the parameter equal for each at the drawn MCMC value.
+
+**xsss** assumes deterministic recruitment with recruitment being estimated directly from the selected stock recruitment curve.  Hence, recruitment deviation estimation in Stock Synthesis needs to be turned off ("0 #do_recdev").  Additionally, all phases for recruitment deviation estimates need to be set to a negative phase.
+
+The model required the depletion survey to have defined parameters for Q and selectivity similar to all other surveys in the model.  An example set-up for the Q parameter section is:
+
+```{r, results = 'asis', echo = FALSE}
+
+  library(kableExtra)
+
+  tab = rbind( c(2, 1, 0, 0, 0, 1, "# Survey"),
+               c(3, 1, 2, 0, 0, 1, "# Depletion Survey"))
+  
+  colnames(tab) = c("Fleet", "Link", "Link_info", "Extra_SE", "Bias_adj", "Float", "Fleet_name")
+  
+  table = tab 
+  kable(table, "html")
+```
+
+The "Link_info" for the depletion survey should be set to option 2, which requires to model to run through all phases when using this special survey option.  Additionally, the "Float" option needs to be set to option 1 for all surveys which allows the model to analytically calculate the Q value for each survey, where the depeltion survey Q value will be equal to 1. In the example above, two additional parameter lines are required for the Q parameter section for the estimation of ln(Q) parameter.
+
+Selectivity must be defined for each fleet in the model, including the depeltion survey.  Since **xsss** uses Stock Synthesis the user is able to define the selectivity curve that is most appropriate for the fishery or survey (e.g., selectivity equal to maturity, dome-shaped). An example length-based selectivity pattern block set-up is:     
+
+```{r, results = 'asis', echo = FALSE}
+
+  library(kableExtra)
+
+  tab = rbind( c(1, 0, 0, 0, "# Fishery"),
+               c(15, 0, 0, 1, "# Survey"),
+               c(10, 0, 0, 0, "# Depletion Survey"))
+  
+  colnames(tab) = c("Pattern", "Discard", "Male", "Special", "Fleet_name")
+  
+  table = tab 
+  kable(table, "html")
+```
+
+where this specification sets the fishery selectivity to a two-parameter logistic curvey and the survey selectivity mirrors (Pattern = 15) the fishery selectivity (Special = 1, the fishery fleet number).  The depletion survey is set to pattern 10 where all fish greater tahn the first length bin have are fully selected.  Alternatively, age-based selectivity may be used for fisheries and surveys and would be defined in a similar fashion using the age-selectivity pattern block.  All selectivity parameters should be fixed at the input parameter values, and hence should be considered carefully.  
+
+
+## Starter file
+
+The starter file is modified by **xsss**.  The user is required to set-up an initial starter file. However, **xsss** performs checks and modifies input values as required (e.g., turn off report file writing for speed, set paramter jitter equal to 0).
 
 ## Forecast file
 
-## Starter file
+**xsss** does not do any adjustments to the forecast file.  The user needs to carefully consider the set-up of this file.  Within the forecast file, the target harvest rate, the control rule, and adjustments to the estimated overfishing limit is defined by the user.  Additionally, harvest may be fixed at a pre-determined value for select years during the forecast period to reflect a management system where harvest limits have already be set by management for specific years.  An example set-up for a West Coast groundfish stock assessment is provided in the example folder.
+
+## Visualizing model set-up
+
+Once all files have been set-up by the user the Stock Synthesis executable should be run to ensure that all files have been defined properly.  The executable may be run from a command window using the command "ss -nohess".  If the model fails to run, the echoinput file can be used to determine where the reading of the input files failed.  After configuring a running model the user should confirm that only the log(R0) parameter is estimated by the model.  The results from a model run can be visualized using the **r4ss** package which can be located here: https://github.com/r4ss.  Once the **r4ss** package is installed the model may be read into R and visualized by:
+
+```{r, r4ss, eval = FALSE}
+model = SS_output("C:/My_Directory/.../")
+SS_plots(model)
+
+```
+
 
 ## Call to the xsss function
 
@@ -105,13 +171,13 @@ where:
 
 * control.name is the name of the control file. This will be used to locate the file to copy and move to the run folder. Additionally, the code will identify this file by name to modify values of natural mortality and steepness for each model iteration.
 
-* dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder.  Addtionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.
+* dat.name is the name of the data file. This will be used to locate the file to copy and move to the run folder.  Additionally, the code will identify this file by to modify values of relative stock status (depl.in) in a fixed model year.
 
-* m.in is a vector of median natural mortality, standard deviation, and whethere female and male natural mortality should be assumed equal.  The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).
+* m.in is a vector of median natural mortality, standard deviation, and whether female and male natural mortality should be assumed equal.  The expected input to the function is c(female M median value, male M median value, female M sd, male M sd, M equal between sexes (0=No, 1=Yes)).
 
-* h.in is a vector of mean steepness, standard devation, and lower and upper bounds for the truncated beta distribution.  The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.
+* h.in is a vector of mean steepness, standard deviation, and lower and upper bounds for the truncated beta distribution.  The expected input to the function is c(steepness mean, steepness sd, lower bound, upper bound, distribution (1= truncated beta)). Currently, only the truncated beta distribution is available for the steepness parameter.
 
-* depl.in is a vector of mean relative stock status (aka "depletion" from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the funciton is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)).  If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.
+* depl.in is a vector of mean relative stock status (aka "depletion" from unfished conditions), the standard deviation, and the lower and upper bound for the truncated beta distribution. The expected input to the function is c(depletion in select year, sd, lower bound, upper bound, distribution (1 = truncated beta, 2 = lognormal)).  If the lognormal distribution is selected the lower and upper bounds for parameters will not be used but still need to be provided.
 
 The function has default values for other inputs to the function that can be overridden by the user.  The full function call will all inputs is: 
 
@@ -140,7 +206,7 @@ where
 
 * read.seed is an option allowing the user to use the same seeds from a previous run. The package will read the seed_list file to set seeds.
 
-* entropy.level is the level of entropy that must be met prior to finishing adapative importance sampling.
+* entropy.level is the level of entropy that must be met prior to finishing adaptive importance sampling.
 
 * Niter is the number of initial model runs for MCMC drawing from the prior distributions. 
 
