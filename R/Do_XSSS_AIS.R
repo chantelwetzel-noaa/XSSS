@@ -249,6 +249,11 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  # How many surveys have added se?
  n.extra.se = sum(temp2)
 
+# Read Starter File and Change values
+ starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
+ starter.file$detailed_age_structrure <- 0
+ SS_writestarter(starter.file,file="starter.ss",overwrite=T, verbose=FALSE, warn=FALSE)
+
 
  # Set up storage matrix
  Quant.out  <-define_matrix(N = Niter, ofl.yrs, depl.yr, n.survey, n.extra.se) 

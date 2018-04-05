@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Summary
+
 **xsss** is a package for Extended Simple Stock Synthesis which was designed for data-limited assessments that use catch and indices of abundance data. XSSS is an extension to Simple Stock Synthesis which calculates a time-series of abundance based on priors for natural mortality, steepness, and stock status in a specific year (Simple Stock Synthesis can be found here: https://github.com/shcaba/SSS).  XSSS applies priors for natural mortality, steepness, and stock status, but uses adaptive importance sampling to update the priors based upon index of abundance data to estimate posterior distributions for each parameter resulting in time-series estimates based on information in the index data.  
 
 ## Software requirements
@@ -217,5 +219,5 @@ where
 * fmsy.m.in and bmsy.b0.in inputs are currently not fully implemented.
 
 ## Examples
-Example function calls and model files are located in the examples folder.
+Example function calls and model files are located in the examples folder (https://github.com/CWetzel/XSSS/tree/master/examples).
 
