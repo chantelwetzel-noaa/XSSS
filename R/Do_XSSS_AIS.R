@@ -274,8 +274,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     if (tantalus == FALSE){ shell("ss.exe -nohess > out.txt 2>&1")}      
     
     rep.new       <- readLines(file.name)
-    Quant.out[i,] <- getQuant(rep.new, parm=parm.vec[i,], ofl.yrs, depl.yr, 
-                              n.extra.se, n.survey)
+    Quant.out[i,] <- getQuant(rep.new, parm=parm.vec[i,], ofl.yrs, depl.yr, n.extra.se, n.survey)
     
     #Rename the report file by rep number and move to a file to save for future needs
     move.files.fxn(rep.folder = rep.folder, sim.num=i)

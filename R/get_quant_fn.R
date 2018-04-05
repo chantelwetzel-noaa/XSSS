@@ -53,11 +53,12 @@
     out[21] <- as.numeric(strsplit(rep.new[grep("Survey",rep.new)], " ")[[1]][2])
     out[22] <- as.numeric(strsplit(rep.new[grep("Crash_Pen",rep.new)], " ")[[1]][2])
     out[23] <- abs(as.numeric(out[4]) - as.numeric(out[8])) > 0.01
+
     ind = length(out) + 1
     for(i in ind:(ind+n.survey-1))  { out[i] <- q[i-ind + 1] }
+
     ind = length(out) + 1
-    for(i in ind:(ind+n.extra.se-1)){ out[i] <- se[i - ind + 1] } 
-    
+    if (!is.na(se)) { for(i in ind:(ind+n.extra.se-1)){ out[i] <- se[i - ind + 1] } }    
     
     out = do.call("cbind", out)
     out = unlist(out)
