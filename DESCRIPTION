@@ -15,5 +15,5 @@ Suggests:
 VignetteBuilder: knitr
 Depends:
     R (>= 3.3.3)
-    Stock Synthesis (>=3.30.11)
+    Stock Synthesis (>= 3.30.11)
 RoxygenNote: 6.0.1
