@@ -140,12 +140,12 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  parm.vec <- round(parm.vec,4)
 
  # Move model files into the species folder
- file.copy(paste0(filepath,"/", "starter.ss"), "starter.ss")
- file.copy(paste0(filepath,"/", "forecast.ss"), "forecast.ss")
- file.copy(paste0(filepath,"/", control.name), control.name)
- file.copy(paste0(filepath,"/", dat.name), dat.name)
- file.copy(paste0(filepath,"/", "ss3.exe"), "ss.exe")
- file.copy(paste0(filepath,"/", "ss.exe"),  "ss.exe")
+ file.copy(paste0(filepath,"/", "starter.ss"), "starter.ss", overwrite = TRUE)
+ file.copy(paste0(filepath,"/", "forecast.ss"), "forecast.ss", overwrite = TRUE)
+ file.copy(paste0(filepath,"/", control.name), control.name, overwrite = TRUE)
+ file.copy(paste0(filepath,"/", dat.name), dat.name, overwrite = TRUE)
+ file.copy(paste0(filepath,"/", "ss3.exe"), "ss.exe", overwrite = TRUE)
+ file.copy(paste0(filepath,"/", "ss.exe"),  "ss.exe", overwrite = TRUE)
 
  # Find depletion year
  dat     <- readLines(dat.name)
