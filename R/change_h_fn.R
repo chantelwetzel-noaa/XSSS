@@ -11,6 +11,6 @@ changeH <- function(ctl, para)
     #ctl.new[grep("_steep",ctl.new)] <- paste(h.line,collapse=" ")
     #write(ctl.new, ctl) 
 
-    SS_changepars(ctlfile=ctl, newctlfile=ctl, strings=c("_steepn") , 
+    SS_changepars(ctlfile=ctl, newctlfile=ctl, strings=c("_steep") , 
         newvals=para, estimate=FALSE, verbose=FALSE)  
  }
