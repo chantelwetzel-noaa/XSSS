@@ -20,6 +20,12 @@ Once you have installed the xsss package, it can be loaded using:
 library(xsss)
 ```
 
+A vignette is available and can be accessed with
+
+```S
+vignette(xsss)
+```
+
 ## Setting up a model
 
 XSSS is data-limited assessment approach for application when only catches and indices of abundance are available allowing for multiple fishing and survey fleets. XSSS requires four input files used by Stock Synthesis: starter, forecast, data, and control file.  Biological relationships (e.g., weight-at-length, fecundity, maturity) and selectivity forms must be defined in the control file.  Example model files are located within the "example" folder.       
