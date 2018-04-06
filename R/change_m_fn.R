@@ -17,5 +17,5 @@
     #write(ctl.new, ctl)
 
     SS_changepars(ctlfile=ctl, newctlfile=ctl, strings=c("NatM_p_1_Fem_GP_1","NatM_p_1_Mal_GP_1") , 
-        newvals=c(para[1], para[2]), estimate=FALSE, verbose=FALSE)
+        newvals=as.numeric(para), estimate=FALSE, verbose=FALSE)
  }
