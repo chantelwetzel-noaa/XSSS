@@ -240,8 +240,8 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
 
 
  # Determine if the model has added variance is used in the control file
- rawctl <- read.table(file= control.name , col.names = 1:20, fill = TRUE, quote = "", 
-        colClasses = "character", nrows = -1, comment.char = "")
+ rawctl <- read.table(file= control.name, #col.names = 1:20, 
+          fill = TRUE, quote = "", colClasses = "character", nrows = -1, comment.char = "")
 
  for(a in 1:10){
     temp <- matchfun(string = "extra_se", obj = rawctl[,a])

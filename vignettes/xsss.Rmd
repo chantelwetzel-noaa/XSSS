@@ -28,6 +28,10 @@ knitr::opts_chunk$set(
 
 **xsss** works using Stock Synthesis which allows the user to create a model with multiple fisheries and surveys if appropriate.  Stock Synthesis is an age-based population dynamics model.  The user needs to provide four input files for Stock Synthesis: starter, forecast, data, and control file.  An advantage for using Stock Synthesis is the flexibility for the user to define simple of complex biology (e.g., sex specific growth, fecundity relationships) and fishery dynamics (e.g., selectivity of fisheries and surveys).  
 
+## File structure
+
+**xsss** will run inside the folder specified by the filepath input to the function (See below for specific information on function inputs).  Inside this folder the user will need to place each of the four model files required by Stock Synthesis and the executable.  The control and data file names are specified by the user when calling the function.  The starter and forecast files need to be named exactly starter.ss and forecast.ss for the package to recognize the files.  A "run" folder will be created inside the filepath folder and all files will be copied into the run folder preserving the original input files.  The ss_summary.sso files will be saved from the final model run in the report folder inside the run folder.  Saved summary files of model results, summary plots, and summary tables are avialable in the save folder.
+
 
 ## Data file
 The data file used for **xsss** mimics a data file that would be used for a typical Stock Synthesis except in a couple notable locations.  The number of fleets specified in the model needs to be changed to N+1 to include an additional depletion survey. The depletion survey is defined similar to other surveys in Stock Synthesis where a list of fishery and survey fleet information is expected prior to the catch data where: 

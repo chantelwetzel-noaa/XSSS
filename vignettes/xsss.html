@@ -12,7 +12,7 @@
 
 <meta name="author" content="Chantel Wetzel" />
 
-<meta name="date" content="2018-04-05" />
+<meta name="date" content="2018-04-06" />
 
 <title>Introduction to Extended Simple Stock Synthesis</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Introduction to Extended Simple Stock Synthesis</h1>
 <h4 class="author"><em>Chantel Wetzel</em></h4>
-<h4 class="date"><em>2018-04-05</em></h4>
+<h4 class="date"><em>2018-04-06</em></h4>
 
 
 
@@ -85,6 +85,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="setting-up-a-model" class="section level2">
 <h2>Setting up a model</h2>
 <p><strong>xsss</strong> works using Stock Synthesis which allows the user to create a model with multiple fisheries and surveys if appropriate. Stock Synthesis is an age-based population dynamics model. The user needs to provide four input files for Stock Synthesis: starter, forecast, data, and control file. An advantage for using Stock Synthesis is the flexibility for the user to define simple of complex biology (e.g., sex specific growth, fecundity relationships) and fishery dynamics (e.g., selectivity of fisheries and surveys).</p>
+</div>
+<div id="file-structure" class="section level2">
+<h2>File structure</h2>
+<p><strong>xsss</strong> will run inside the folder specified by the filepath input to the function (See below for specific information on function inputs). Inside this folder the user will need to place each of the four model files required by Stock Synthesis and the executable. The control and data file names are specified by the user when calling the function. The starter and forecast files need to be named exactly starter.ss and forecast.ss for the package to recognize the files. A “run” folder will be created inside the filepath folder and all files will be copied into the run folder preserving the original input files. The ss_summary.sso files will be saved from the final model run in the report folder inside the run folder. Saved summary files of model results, summary plots, and summary tables are avialable in the save folder.</p>
 </div>
 <div id="data-file" class="section level2">
 <h2>Data file</h2>
