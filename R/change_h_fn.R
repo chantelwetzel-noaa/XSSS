@@ -5,9 +5,12 @@
 changeH <- function(ctl, para)
  {
     para <- round(para,4)
-    ctl.new <- readLines(ctl)
-    h.line  <- strsplit(ctl.new[grep("BH_steep",ctl.new)],"[[:blank:]]+")[[1]]
-    h.line[c(3,4)] <- para
-    ctl.new[grep("_steep",ctl.new)] <- paste(h.line,collapse=" ")
-    write(ctl.new, ctl)   
+    #ctl.new <- readLines(ctl)
+    #h.line  <- strsplit(ctl.new[grep("_steep",ctl.new)],"[[:blank:]]+")[[1]]
+    #h.line[3] <- para
+    #ctl.new[grep("_steep",ctl.new)] <- paste(h.line,collapse=" ")
+    #write(ctl.new, ctl) 
+
+    SS_changepars(ctlfile=ctl, newctlfile=ctl, strings=c("_steepn") , 
+        newvals=para, estimate=FALSE, verbose=FALSE)  
  }

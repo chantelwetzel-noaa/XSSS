@@ -251,6 +251,14 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
  # How many surveys have added se?
  n.extra.se = sum(temp2)
 
+ # Change the low and high bound for M values & steepness
+ SS_changepars(ctlfile=control.name, newctlfile=control.name, strings=c("NatM_p_1_Fem_GP_1","NatM_p_1_Mal_GP_1") , 
+         newlos=c(0.001, 0.001), newhis= c(0.90, 0.90), estimate=FALSE, verbose=FALSE)
+
+ SS_changepars(ctlfile=control.name, newctlfile=control.name, strings=c("_steep") , 
+         newlos=0.20, newhis= 1, estimate=FALSE, verbose=FALSE)
+
+
 # Read Starter File and Change values
  starter.file <- SS_readstarter("starter.ss", verbose = FALSE)
  starter.file$detailed_age_structure <- 0
