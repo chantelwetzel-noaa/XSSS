@@ -25,7 +25,7 @@
 ##' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
 ##' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
 ##' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
-##' \cod{\linkd{plot_fn}}
+##' \code{\linkd{plot_fn}}
 ##' @import mvtnorm
 ##' @import stats
 ##' @import r4ss
