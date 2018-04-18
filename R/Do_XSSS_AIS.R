@@ -1,34 +1,34 @@
-##' This the main AIS code
-##' The code will run the initial N sample of models
-##' AIS is then started based on initial model weights
-##' The final sample is performed using the weights that exceeded entropy threshold
-##' @param filepath = parent directory above the folder with the model files 
-##' @param control.name 
-##' @param dat.name
-##' @param tantalus = TRUE/FALSE,  Option for use with linux systems, NWFSC specific
-##' @param read.seed = TRUE/FALSE, Option to allow the user to predefine seeds from previous model run, reads the seed_list file
-##' @param Niter number of initial model runs
-##' @param AIS.iter number of AIS model runs
-##' @param final.Niter number of final model runs, recommened to be greater than N.iter and AIS.iter
-##' @param m.in = c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed
-##' @param h.in = c(prior mean, prior stdev, lower bound, upper bound, distribution (trunacted beta only))
-##' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution (1 = truncated beta, 2 = lognormal)) 
-##' @param fmsy.m.in NOT YET FULLY IMPLEMENTED
-##' @param bmsy.b0.in NOT YET FULLY IMPLEMENTED
-##' @author Chantel Wetzel
-##' @export
-##' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
-##' \code{\link{do_sir_fn}}, \code{\link{get_prior_fn}},
-##' \code{\link{get_new_posteriors_fn}}, \code{\link{get_new_wghts_fn}},
-##' \code{\link{fit_mvt_fn}}, \code{\link{change_m_fn}},
-##' \code{\link{change_h_fn}}, \code{\link{change_depl_fn}},
-##' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
-##' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
-##' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
-##' \code{\link{plot_fn}}
-##' @import mvtnorm
-##' @import stats
-##' @import r4ss
+#' This the main AIS code
+#' The code will run the initial N sample of models
+#' AIS is then started based on initial model weights
+#' The final sample is performed using the weights that exceeded entropy threshold
+#' @param filepath = parent directory above the folder with the model files 
+#' @param control.name 
+#' @param dat.name
+#' @param tantalus = TRUE/FALSE,  Option for use with linux systems, NWFSC specific
+#' @param read.seed = TRUE/FALSE, Option to allow the user to predefine seeds from previous model run, reads the seed_list file
+#' @param Niter number of initial model runs
+#' @param AIS.iter number of AIS model runs
+#' @param final.Niter number of final model runs, recommened to be greater than N.iter and AIS.iter
+#' @param m.in = c(prior mean f, prior mean m, prior stdev, prior stdev, start m equal) lognormally distributed
+#' @param h.in = c(prior mean, prior stdev, lower bound, upper bound, distribution (trunacted beta only))
+#' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution (1 = truncated beta, 2 = lognormal)) 
+#' @param fmsy.m.in NOT YET FULLY IMPLEMENTED
+#' @param bmsy.b0.in NOT YET FULLY IMPLEMENTED
+#' @author Chantel Wetzel
+#' @export
+#' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
+#' \code{\link{do_sir_fn}}, \code{\link{get_prior_fn}},
+#' \code{\link{get_new_posteriors_fn}}, \code{\link{get_new_wghts_fn}},
+#' \code{\link{fit_mvt_fn}}, \code{\link{change_m_fn}},
+#' \code{\link{change_h_fn}}, \code{\link{change_depl_fn}},
+#' \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
+#' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
+#' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
+#' \code{\link{plot_fn}}
+#' @import mvtnorm
+#' @import stats
+#' @import r4ss
 
 SSS.ais.fxn <- function(filepath, control.name, dat.name, 
                         tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
