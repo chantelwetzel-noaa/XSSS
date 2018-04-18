@@ -9,7 +9,7 @@ Extended Simple Stock Synthesis (XSSS) is an assessment method for application t
 ```S
 install.packages("devtools")
 library(devtools)
-devtools::install_github(git, build_vignettes = TRUE)
+devtools::install_github("CWetzel/XSSS", build_vignettes = TRUE)
 ```
 
 Note: devtools may give this message: "*WARNING: Rtools is required to build R packages, but is not currently installed.*" However, Rtools is NOT required for installing xsss via devtools, so ignore the warning.
