@@ -7,8 +7,9 @@ Extended Simple Stock Synthesis (XSSS) is an assessment method for application t
 ## Installation
 
 ```S
-install.packages("devtools")
+install.packages(c("devtools", "kableExtra"))
 library(devtools)
+
 devtools::install_github("CWetzel/XSSS", build_vignettes = TRUE)
 ```
 
