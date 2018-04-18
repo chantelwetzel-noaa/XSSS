@@ -52,7 +52,7 @@ The final sample is performed using the weights that exceeded entropy threshold
 \code{\link{get_quant_fn}}, \code{\link{summary_fn}},
 \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
 \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
-\cod{\linkd{plot_fn}}
+\code{\link{plot_fn}}
 }
 \author{
 Chantel Wetzel
