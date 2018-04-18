@@ -26,9 +26,11 @@
 #' \code{\link{move_file_fn}}, \code{\link{get_see_fn}},
 #' \code{\link{match_fn}}, \code{\link{define_matrix_fn}}
 #' \code{\link{plot_fn}}
+#'
 #' @import mvtnorm
 #' @import stats
 #' @import r4ss
+#' @import kableExtra
 
 SSS.ais.fxn <- function(filepath, control.name, dat.name, 
                         tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
