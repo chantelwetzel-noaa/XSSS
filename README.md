@@ -24,7 +24,7 @@ library(xsss)
 A vignette is available and can be accessed with
 
 ```S
-vignette(xsss)
+vignette("xsss")
 ```
 
 ## Setting up a model
