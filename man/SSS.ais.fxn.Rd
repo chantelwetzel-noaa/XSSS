@@ -10,7 +10,7 @@ The final sample is performed using the weights that exceeded entropy threshold}
 SSS.ais.fxn(filepath, control.name, dat.name, tantalus = FALSE,
   read.seed = FALSE, entropy.level = 0.92, Niter = 2000,
   AIS.iter = 2000, final.Niter = 5000, m.in, h.in, depl.in,
-  fmsy.m.in = NULL, bmsy.b0.in = NULL)
+  fmsy.m.in = NULL, bmsy.b0.in = NULL, bypass.entropy = FALSE)
 }
 \arguments{
 \item{filepath}{= parent directory above the folder with the model files}
@@ -36,6 +36,8 @@ SSS.ais.fxn(filepath, control.name, dat.name, tantalus = FALSE,
 \item{fmsy.m.in}{NOT YET FULLY IMPLEMENTED}
 
 \item{bmsy.b0.in}{NOT YET FULLY IMPLEMENTED}
+
+\item{bypass.entropy}{TRUE/FALSE option to not meet the entropy criteria. Only used for troubleshooting/development.}
 }
 \description{
 This the main AIS code
