@@ -15,6 +15,8 @@
 #' @param depl.in = c(0.50, 0.20, 0.01, 0.99, distribution (1 = truncated beta, 2 = lognormal)) 
 #' @param fmsy.m.in NOT YET FULLY IMPLEMENTED
 #' @param bmsy.b0.in NOT YET FULLY IMPLEMENTED
+#' @param bypass.entropy TRUE/FALSE option to not meet the entropy criteria. Only used for troubleshooting/development.
+#' 
 #' @author Chantel Wetzel
 #' @export
 #' @seealso \code{\link{rbeta_ab_fn}}, \code{\link{pars_truncbeta_fn}},
@@ -35,7 +37,8 @@
 SSS.ais.fxn <- function(filepath, control.name, dat.name, 
                         tantalus=FALSE, read.seed = FALSE, entropy.level = 0.92,
                         Niter = 2000, AIS.iter = 2000, final.Niter = 5000, 
-                        m.in, h.in , depl.in, fmsy.m.in = NULL, bmsy.b0.in = NULL) 
+                        m.in, h.in , depl.in, fmsy.m.in = NULL, bmsy.b0.in = NULL,
+                        bypass.entropy = FALSE) 
                         
 {
 
@@ -387,6 +390,7 @@ SSS.ais.fxn <- function(filepath, control.name, dat.name,
     print(c("Max Weight:", round(maxW,4)))
     print(c("Variance of the rescaled:", varW))    
     if (entropy >= entropy.level) break()
+    if (bypass.entropy == TRUE) break()
                          
     #This is where sample from the new parameter values
     new.dists           <- fit.mvt(Niter, para=sir.vec, degree=5, m.in, depl.in)
