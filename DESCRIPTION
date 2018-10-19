@@ -12,6 +12,11 @@ BugReports: https://github.com/CWetzel/xsss/issues
 Suggests:
     knitr,
     rmarkdown
+Imports:
+	mvtnorm,
+	stats,
+	kableExtra,
+	r4ss
 VignetteBuilder: knitr
 Depends:
     R (>= 3.1.0)
